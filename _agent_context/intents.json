@@ -84,6 +84,23 @@
         "WizardStep"
       ],
       "writes": []
+    },
+    {
+      "path": "/intents/anforderung-anlegen",
+      "label": "Anforderung anlegen",
+      "description": "Neue Anforderung zu einem Angebotsvorhaben erfassen, Quelle dokumentieren und Vorgängerversion verknüpfen",
+      "file": "src/pages/intents/AnforderungAnlegenPage.tsx",
+      "summary": "/**\n * Anforderung anlegen — 4-Schritt-Wizard plus Prüfen.\n * Steps: 1) Vorhaben wählen → 2) Titel, Beschreibung, Quellenart → 3) Quellenangabe & Gültig-ab →\n *        4) Vorgängerversion (optional) → 5) Prüfen & anlegen.\n * Reads: angebotsvorhaben, anforderungen (Vorgängerversion). Writes: anforderungen (status 'entwurf' vom Hook gesetzt).\n * Composes: IntentWizardShell, EntitySelectStep, Bound, StepNav, SummaryStep, SuccessStep.\n */",
+      "components": [
+        "Bound",
+        "EntitySelectStep",
+        "IntentWizardShell",
+        "StepNav",
+        "SuccessStep",
+        "SummaryStep",
+        "WizardStep"
+      ],
+      "writes": []
     }
   ],
   "unregistered_pages": []

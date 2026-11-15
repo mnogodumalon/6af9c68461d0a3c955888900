@@ -55,10 +55,6 @@ export const PLAN_SENTENCES: Record<string, string[]> = {
   "anforderung-anlegen": [
     "Legt an: anforderungen",
     "Automatisch: status (fester Wert „entwurf“)"
-  ],
-  "fachbeitrag-erfassen": [
-    "Legt an: fachbeitraege",
-    "Automatisch: status (fester Wert „entwurf“)"
   ]
 };
 
@@ -124,9 +120,6 @@ export const FLOW_ENTITIES: Record<string, string[]> = {
   ],
   "anforderung-anlegen": [
     "anforderungen"
-  ],
-  "fachbeitrag-erfassen": [
-    "fachbeitraege"
   ]
 };
 

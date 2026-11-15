@@ -80,6 +80,24 @@
           "in_expert_search": true,
           "translations": null
         },
+        "aktiv": {
+          "kind": "boolcontrol",
+          "url": "https://my.living-apps.de/rest/v1/apps/6af9c65deb7e80ebf1c9e8dd/controls/aktiv",
+          "identifier": "aktiv",
+          "label": "Aktiv",
+          "type": "bool",
+          "subtype": null,
+          "fulltype": "bool",
+          "description": "A boolean value, i.e. `true` or `false` (or `null`/`None`).",
+          "required": false,
+          "in_list": false,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": null,
+          "in_fulltext_search": null,
+          "in_expert_search": true,
+          "translations": null
+        },
         "rolle": {
           "kind": "textcontrol",
           "url": "https://my.living-apps.de/rest/v1/apps/6af9c65deb7e80ebf1c9e8dd/controls/rolle",
@@ -193,24 +211,6 @@
               "translations": null
             }
           }
-        },
-        "aktiv": {
-          "kind": "boolcontrol",
-          "url": "https://my.living-apps.de/rest/v1/apps/6af9c65deb7e80ebf1c9e8dd/controls/aktiv",
-          "identifier": "aktiv",
-          "label": "Aktiv",
-          "type": "bool",
-          "subtype": null,
-          "fulltype": "bool",
-          "description": "A boolean value, i.e. `true` or `false` (or `null`/`None`).",
-          "required": false,
-          "in_list": false,
-          "in_mobile_list": false,
-          "in_text": false,
-          "in_structured_search": null,
-          "in_fulltext_search": null,
-          "in_expert_search": true,
-          "translations": null
         }
       }
     },
@@ -1162,6 +1162,24 @@
             }
           }
         },
+        "beschreibung": {
+          "kind": "textareacontrol",
+          "url": "https://my.living-apps.de/rest/v1/apps/6af9c663254ee009281b58ce/controls/beschreibung",
+          "identifier": "beschreibung",
+          "label": "Beschreibung",
+          "type": "string",
+          "subtype": "textarea",
+          "fulltype": "string/textarea",
+          "description": "A string value that can contain multiple lines of text (or `null`/`None`).",
+          "required": false,
+          "in_list": false,
+          "in_mobile_list": false,
+          "in_text": false,
+          "in_structured_search": null,
+          "in_fulltext_search": true,
+          "in_expert_search": true,
+          "translations": null
+        },
         "herstellkosten": {
           "kind": "numbercontrol",
           "url": "https://my.living-apps.de/rest/v1/apps/6af9c663254ee009281b58ce/controls/herstellkosten",
@@ -1252,24 +1270,6 @@
           "in_list": true,
           "in_mobile_list": true,
           "in_text": true,
-          "in_structured_search": null,
-          "in_fulltext_search": true,
-          "in_expert_search": true,
-          "translations": null
-        },
-        "beschreibung": {
-          "kind": "textareacontrol",
-          "url": "https://my.living-apps.de/rest/v1/apps/6af9c663254ee009281b58ce/controls/beschreibung",
-          "identifier": "beschreibung",
-          "label": "Beschreibung",
-          "type": "string",
-          "subtype": "textarea",
-          "fulltype": "string/textarea",
-          "description": "A string value that can contain multiple lines of text (or `null`/`None`).",
-          "required": false,
-          "in_list": false,
-          "in_mobile_list": false,
-          "in_text": false,
           "in_structured_search": null,
           "in_fulltext_search": true,
           "in_expert_search": true,

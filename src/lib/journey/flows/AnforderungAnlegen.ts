@@ -141,8 +141,9 @@ export function useAnforderungAnlegenFlow(options: AnforderungAnlegenFlowOptions
     })),
     vorgaengerversion: useRecordSearch(servicePort, 'anforderungen', withPickPolicy('vorgaengerversion', {
       searchFields: ["titel"] as never,
-      // all anforderungen — the step must not hide records while no vorhaben is picked
-      where: (r: JourneyRecord) => (options.where?.vorgaengerversion?.(r) ?? true),
+      // only the anforderungen of the vorhaben picked before
+      filter: combineFilters("r.v_status == 'gueltig'", dependsOn(anforderungen.get("vorhaben"), 'vorhaben')),
+      where: (r: JourneyRecord) => ((fieldLookup(r, "status")?.key ?? null) === "gueltig") && dependsWhere(r, 'vorhaben', anforderungen.get("vorhaben")) && (options.where?.vorgaengerversion?.(r) ?? true),
       toItem: options.items?.vorgaengerversion as never,
       claim: 'anforderungen.vorgaengerversion',
     })),

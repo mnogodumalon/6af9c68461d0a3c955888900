@@ -1,4 +1,4 @@
-import type { Aufgaben, Angebotsvorhaben, Beteiligte, Entscheidungen } from '@/types/app';
+import type { Aufgaben, Angebotsvorhaben, Beteiligte, Fachbeitraege, Abhaengigkeiten, Entscheidungen } from '@/types/app';
 import { APP_IDS } from '@/types/app';
 import { extractRecordId } from '@/services/livingAppsService';
 import {
@@ -24,6 +24,24 @@ export interface AufgabenDetailsProps {
   aufgabenList: Aufgaben[];
   /** Klick auf die Aufgaben-Relation → overlay.push auf dessen Detail. */
   onOpenAufgaben?: (record: Aufgaben) => void;
+  /** 1:N „Fachbeiträge" (aufgabe): VOLLE Liste — der Block filtert auf diesen Record. */
+  fachbeitraegeList: Fachbeitraege[];
+  /** Zeilen-Klick → overlay.push auf das Fachbeitraege-Detail (nie der Edit-Dialog). */
+  onOpenFachbeitraege: (record: Fachbeitraege) => void;
+  /** Kontextuelles „+": öffnet den Fachbeitraege-Dialog mit diesem Record vorgesetzt. */
+  onAddFachbeitraege?: () => void;
+  /** 1:N „Abhängigkeiten" (abhaengige_aufgabe): VOLLE Liste — der Block filtert auf diesen Record. */
+  abhaengigkeitenAbhaengigeAufgabeList: Abhaengigkeiten[];
+  /** Zeilen-Klick → overlay.push auf das Abhaengigkeiten-Detail (nie der Edit-Dialog). */
+  onOpenAbhaengigkeitenAbhaengigeAufgabe: (record: Abhaengigkeiten) => void;
+  /** Kontextuelles „+": öffnet den Abhaengigkeiten-Dialog mit diesem Record vorgesetzt. */
+  onAddAbhaengigkeitenAbhaengigeAufgabe?: () => void;
+  /** 1:N „Abhängigkeiten" (grundlage_aufgabe): VOLLE Liste — der Block filtert auf diesen Record. */
+  abhaengigkeitenGrundlageAufgabeList: Abhaengigkeiten[];
+  /** Zeilen-Klick → overlay.push auf das Abhaengigkeiten-Detail (nie der Edit-Dialog). */
+  onOpenAbhaengigkeitenGrundlageAufgabe: (record: Abhaengigkeiten) => void;
+  /** Kontextuelles „+": öffnet den Abhaengigkeiten-Dialog mit diesem Record vorgesetzt. */
+  onAddAbhaengigkeitenGrundlageAufgabe?: () => void;
   /** 1:N „Entscheidungen" (aufgabe): VOLLE Liste — der Block filtert auf diesen Record. */
   entscheidungenList: Entscheidungen[];
   /** Zeilen-Klick → overlay.push auf das Entscheidungen-Detail (nie der Edit-Dialog). */
@@ -40,6 +58,15 @@ export function AufgabenDetails({
   onOpenBeteiligte,
   aufgabenList,
   onOpenAufgaben,
+  fachbeitraegeList,
+  onOpenFachbeitraege,
+  onAddFachbeitraege,
+  abhaengigkeitenAbhaengigeAufgabeList,
+  onOpenAbhaengigkeitenAbhaengigeAufgabe,
+  onAddAbhaengigkeitenAbhaengigeAufgabe,
+  abhaengigkeitenGrundlageAufgabeList,
+  onOpenAbhaengigkeitenGrundlageAufgabe,
+  onAddAbhaengigkeitenGrundlageAufgabe,
   entscheidungenList,
   onOpenEntscheidungen,
   onAddEntscheidungen,
@@ -86,9 +113,36 @@ export function AufgabenDetails({
       </RecordSection>
 
       <SatelliteSection
+        title={appLabel('fachbeitraege')}
+        items={fachbeitraegeList.filter(r => extractRecordId(r.fields.aufgabe) === record.record_id)}
+        map={r => ({ name: displayNameOf('fachbeitraege', r.fields as Record<string, unknown>) || appLabel('fachbeitraege'), meta: displayPart(r.fields.gueltig_von) })}
+        onOpen={onOpenFachbeitraege}
+        onAdd={onAddFachbeitraege}
+        getKey={r => r.record_id}
+      />
+
+      <SatelliteSection
+        title={`${appLabel('abhaengigkeiten')} · ${fieldLabel('abhaengigkeiten', 'abhaengige_aufgabe')}`}
+        items={abhaengigkeitenAbhaengigeAufgabeList.filter(r => extractRecordId(r.fields.abhaengige_aufgabe) === record.record_id)}
+        map={r => ({ name: displayNameOf('abhaengigkeiten', r.fields as Record<string, unknown>) || appLabel('abhaengigkeiten'), meta: displayPart(r.fields.geprueft_am) })}
+        onOpen={onOpenAbhaengigkeitenAbhaengigeAufgabe}
+        onAdd={onAddAbhaengigkeitenAbhaengigeAufgabe}
+        getKey={r => r.record_id}
+      />
+
+      <SatelliteSection
+        title={`${appLabel('abhaengigkeiten')} · ${fieldLabel('abhaengigkeiten', 'grundlage_aufgabe')}`}
+        items={abhaengigkeitenGrundlageAufgabeList.filter(r => extractRecordId(r.fields.grundlage_aufgabe) === record.record_id)}
+        map={r => ({ name: displayNameOf('abhaengigkeiten', r.fields as Record<string, unknown>) || appLabel('abhaengigkeiten'), meta: displayPart(r.fields.geprueft_am) })}
+        onOpen={onOpenAbhaengigkeitenGrundlageAufgabe}
+        onAdd={onAddAbhaengigkeitenGrundlageAufgabe}
+        getKey={r => r.record_id}
+      />
+
+      <SatelliteSection
         title={appLabel('entscheidungen')}
         items={entscheidungenList.filter(r => extractRecordId(r.fields.aufgabe) === record.record_id)}
-        map={r => ({ name: displayNameOf('entscheidungen', r.fields as Record<string, unknown>) || appLabel('entscheidungen'), meta: displayPart(r.fields.entscheidungsdatum) })}
+        map={r => ({ name: displayNameOf('entscheidungen', r.fields as Record<string, unknown>) || appLabel('entscheidungen'), meta: displayPart(r.fields.freigabedatum) })}
         onOpen={onOpenEntscheidungen}
         onAdd={onAddEntscheidungen}
         getKey={r => r.record_id}

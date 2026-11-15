@@ -1,7 +1,7 @@
 /**
  * useVarianteErfassenFlow — the plumbing of the flow « Angebotsvariante erfassen », generated from the plan.
  *
- * Writes `angebotsvarianten`: asks `vorhaben`, `variantenbezeichnung`, `beschreibung`, `menge`, `teillieferung`, `herstellkosten`, `beschaffungskosten`, `aufwand_stunden`, `angebotspreis`, `akzeptierte_risiken`, `vertragsbedingungen`, `liefertermin`; sets `status` itself.
+ * Writes `angebotsvarianten`: asks `menge`, `vorhaben`, `beschreibung`, `liefertermin`, `angebotspreis`, `teillieferung`, `herstellkosten`, `aufwand_stunden`, `beschaffungskosten`, `akzeptierte_risiken`, `vertragsbedingungen`, `variantenbezeichnung`; sets `status` itself.
  * The hook OWNS: the form(s) with exactly these fields and the plan's required
  * ingredients, one record search per picked field (columns and filter from
  * the plan), and the submit plan with its fixed and derived values. A page
@@ -16,22 +16,22 @@
  *   messages  the sentence for an empty required field, per field
  *
  *   const flow = useVarianteErfassenFlow({
- *     steps: { vorhaben: 1, variantenbezeichnung: 2, beschreibung: 2, menge: 2, teillieferung: 2, herstellkosten: 2, beschaffungskosten: 2, aufwand_stunden: 2, angebotspreis: 2, akzeptierte_risiken: 2, vertragsbedingungen: 2, liefertermin: 2 },
+ *     steps: { vorhaben: 1, menge: 2, beschreibung: 2, liefertermin: 2, angebotspreis: 2, teillieferung: 2, herstellkosten: 2, aufwand_stunden: 2, beschaffungskosten: 2, akzeptierte_risiken: 2, vertragsbedingungen: 2, variantenbezeichnung: 2 },
  *     items: { vorhaben: r => ({ id: r.id, title: fieldText(r, 'bezeichnung') }) },
  *   });
  *   <IntentWizardShell forms={flow.forms} draftKey={flow.draftKey} …>
  *     <EntitySelectStep {...flow.picks.vorhaben.select} {...flow.pick('vorhaben')} />
- *     <Bound form={flow.forms.angebotsvarianten} name="variantenbezeichnung" />
- *     <Bound form={flow.forms.angebotsvarianten} name="beschreibung" />
  *     <Bound form={flow.forms.angebotsvarianten} name="menge" />
+ *     <Bound form={flow.forms.angebotsvarianten} name="beschreibung" />
+ *     <Bound form={flow.forms.angebotsvarianten} name="liefertermin" />
+ *     <Bound form={flow.forms.angebotsvarianten} name="angebotspreis" />
  *     <Bound form={flow.forms.angebotsvarianten} name="teillieferung" />
  *     <Bound form={flow.forms.angebotsvarianten} name="herstellkosten" />
- *     <Bound form={flow.forms.angebotsvarianten} name="beschaffungskosten" />
  *     <Bound form={flow.forms.angebotsvarianten} name="aufwand_stunden" />
- *     <Bound form={flow.forms.angebotsvarianten} name="angebotspreis" />
+ *     <Bound form={flow.forms.angebotsvarianten} name="beschaffungskosten" />
  *     <Bound form={flow.forms.angebotsvarianten} name="akzeptierte_risiken" />
  *     <Bound form={flow.forms.angebotsvarianten} name="vertragsbedingungen" />
- *     <Bound form={flow.forms.angebotsvarianten} name="liefertermin" />
+ *     <Bound form={flow.forms.angebotsvarianten} name="variantenbezeichnung" />
  *     <StepNav onNext={() => flow.validateStep(n)} />
  *     {!flow.submit.done && <SummaryStep forms={flow.formList} submit={flow.submit} />}
  *     {flow.submit.result && <SuccessStep result={flow.submit.result} forms={flow.formList} submit={flow.submit} />}
@@ -107,10 +107,10 @@ function hasValues(form: StepForm): boolean {
 export function useVarianteErfassenFlow(options: VarianteErfassenFlowOptions = {}) {
   const steps = { ...DEFAULT_STEPS, ...(options.steps ?? {}) } as Record<string, number>;
   const angebotsvarianten = useStepForm('angebotsvarianten', {
-    fields: ["vorhaben", "variantenbezeichnung", "beschreibung", "menge", "teillieferung", "herstellkosten", "beschaffungskosten", "aufwand_stunden", "angebotspreis", "akzeptierte_risiken", "vertragsbedingungen", "liefertermin"],
-    steps: only(steps, ["vorhaben", "variantenbezeichnung", "beschreibung", "menge", "teillieferung", "herstellkosten", "beschaffungskosten", "aufwand_stunden", "angebotspreis", "akzeptierte_risiken", "vertragsbedingungen", "liefertermin"]) as Record<string, number>,
-    initial: only(options.initial as FormValues | undefined, ["vorhaben", "variantenbezeichnung", "beschreibung", "menge", "teillieferung", "herstellkosten", "beschaffungskosten", "aufwand_stunden", "angebotspreis", "akzeptierte_risiken", "vertragsbedingungen", "liefertermin"]),
-    messages: only(options.messages as Record<string, string> | undefined, ["vorhaben", "variantenbezeichnung", "beschreibung", "menge", "teillieferung", "herstellkosten", "beschaffungskosten", "aufwand_stunden", "angebotspreis", "akzeptierte_risiken", "vertragsbedingungen", "liefertermin"]),
+    fields: ["menge", "vorhaben", "beschreibung", "liefertermin", "angebotspreis", "teillieferung", "herstellkosten", "aufwand_stunden", "beschaffungskosten", "akzeptierte_risiken", "vertragsbedingungen", "variantenbezeichnung"],
+    steps: only(steps, ["menge", "vorhaben", "beschreibung", "liefertermin", "angebotspreis", "teillieferung", "herstellkosten", "aufwand_stunden", "beschaffungskosten", "akzeptierte_risiken", "vertragsbedingungen", "variantenbezeichnung"]) as Record<string, number>,
+    initial: only(options.initial as FormValues | undefined, ["menge", "vorhaben", "beschreibung", "liefertermin", "angebotspreis", "teillieferung", "herstellkosten", "aufwand_stunden", "beschaffungskosten", "akzeptierte_risiken", "vertragsbedingungen", "variantenbezeichnung"]),
+    messages: only(options.messages as Record<string, string> | undefined, ["menge", "vorhaben", "beschreibung", "liefertermin", "angebotspreis", "teillieferung", "herstellkosten", "aufwand_stunden", "beschaffungskosten", "akzeptierte_risiken", "vertragsbedingungen", "variantenbezeichnung"]),
   });
   const forms: VarianteErfassenForms = { angebotsvarianten };
   // the editor of a list is not a record of its own: the review and the success
@@ -181,17 +181,17 @@ export function useVarianteErfassenFlow(options: VarianteErfassenFlowOptions = {
       if (kind === 'bool') return raw === 'true' || raw === '1' || raw === 'ja';
       return raw;
     };
-    { const v = linkedParams.get('variantenbezeichnung'); if (v !== null && isEmptyValue(angebotsvarianten.get('variantenbezeichnung'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('variantenbezeichnung', coerce(angebotsvarianten, 'variantenbezeichnung', v)); }
-    { const v = linkedParams.get('beschreibung'); if (v !== null && isEmptyValue(angebotsvarianten.get('beschreibung'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('beschreibung', coerce(angebotsvarianten, 'beschreibung', v)); }
     { const v = linkedParams.get('menge'); if (v !== null && isEmptyValue(angebotsvarianten.get('menge'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('menge', coerce(angebotsvarianten, 'menge', v)); }
+    { const v = linkedParams.get('beschreibung'); if (v !== null && isEmptyValue(angebotsvarianten.get('beschreibung'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('beschreibung', coerce(angebotsvarianten, 'beschreibung', v)); }
+    { const v = linkedParams.get('liefertermin'); if (v !== null && isEmptyValue(angebotsvarianten.get('liefertermin'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('liefertermin', coerce(angebotsvarianten, 'liefertermin', v)); }
+    { const v = linkedParams.get('angebotspreis'); if (v !== null && isEmptyValue(angebotsvarianten.get('angebotspreis'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('angebotspreis', coerce(angebotsvarianten, 'angebotspreis', v)); }
     { const v = linkedParams.get('teillieferung'); if (v !== null && isEmptyValue(angebotsvarianten.get('teillieferung'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('teillieferung', coerce(angebotsvarianten, 'teillieferung', v)); }
     { const v = linkedParams.get('herstellkosten'); if (v !== null && isEmptyValue(angebotsvarianten.get('herstellkosten'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('herstellkosten', coerce(angebotsvarianten, 'herstellkosten', v)); }
-    { const v = linkedParams.get('beschaffungskosten'); if (v !== null && isEmptyValue(angebotsvarianten.get('beschaffungskosten'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('beschaffungskosten', coerce(angebotsvarianten, 'beschaffungskosten', v)); }
     { const v = linkedParams.get('aufwand_stunden'); if (v !== null && isEmptyValue(angebotsvarianten.get('aufwand_stunden'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('aufwand_stunden', coerce(angebotsvarianten, 'aufwand_stunden', v)); }
-    { const v = linkedParams.get('angebotspreis'); if (v !== null && isEmptyValue(angebotsvarianten.get('angebotspreis'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('angebotspreis', coerce(angebotsvarianten, 'angebotspreis', v)); }
+    { const v = linkedParams.get('beschaffungskosten'); if (v !== null && isEmptyValue(angebotsvarianten.get('beschaffungskosten'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('beschaffungskosten', coerce(angebotsvarianten, 'beschaffungskosten', v)); }
     { const v = linkedParams.get('akzeptierte_risiken'); if (v !== null && isEmptyValue(angebotsvarianten.get('akzeptierte_risiken'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('akzeptierte_risiken', coerce(angebotsvarianten, 'akzeptierte_risiken', v)); }
     { const v = linkedParams.get('vertragsbedingungen'); if (v !== null && isEmptyValue(angebotsvarianten.get('vertragsbedingungen'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('vertragsbedingungen', coerce(angebotsvarianten, 'vertragsbedingungen', v)); }
-    { const v = linkedParams.get('liefertermin'); if (v !== null && isEmptyValue(angebotsvarianten.get('liefertermin'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('liefertermin', coerce(angebotsvarianten, 'liefertermin', v)); }
+    { const v = linkedParams.get('variantenbezeichnung'); if (v !== null && isEmptyValue(angebotsvarianten.get('variantenbezeichnung'))) (angebotsvarianten.set as (k: string, v: unknown) => void)('variantenbezeichnung', coerce(angebotsvarianten, 'variantenbezeichnung', v)); }
     {
       const cur = forms.angebotsvarianten.get('vorhaben');
       const fromLink = linkedParams.get('vorhaben');

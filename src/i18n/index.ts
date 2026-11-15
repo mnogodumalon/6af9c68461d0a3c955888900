@@ -1726,6 +1726,60 @@ export const LABELS: Record<CoreLocale, LabelBundle> = {
           }
         }
       },
+      "anforderungen": {
+        "name": "Anforderungen",
+        "app_id": "6af9c88d14e1a81ff0b2dbac",
+        "fields": {
+          "vorhaben": "Angebotsvorhaben",
+          "titel": "Titel",
+          "beschreibung": "Beschreibung",
+          "quellenart": "Art der Quelle",
+          "quellenangabe": "Quellenangabe",
+          "version": "Version",
+          "status": "Status",
+          "gueltig_ab": "Gültig ab",
+          "vorgaengerversion": "Vorgängerversion"
+        },
+        "lookups": {
+          "quellenart": {
+            "kundenanfrage": "Kundenanfrage",
+            "zeichnung": "Zeichnung",
+            "norm": "Norm oder Vorschrift",
+            "gespraech": "Gespräch oder Besprechung",
+            "intern": "Interne Vorgabe"
+          },
+          "status": {
+            "entwurf": "Entwurf",
+            "gueltig": "Gültig",
+            "ersetzt": "Ersetzt",
+            "entfallen": "Entfallen"
+          }
+        }
+      },
+      "fachbeitraege": {
+        "name": "Fachbeiträge",
+        "app_id": "6af9c88e7dd46f00185bb8ba",
+        "fields": {
+          "vorhaben": "Angebotsvorhaben",
+          "aufgabe": "Zugehörige Aufgabe",
+          "autor": "Autor",
+          "anforderung": "Bezogene Anforderung",
+          "variante": "Bezogene Angebotsvariante",
+          "inhalt": "Inhalt des Beitrags",
+          "bedingungen": "Bedingungen",
+          "gueltig_von": "Gültig von",
+          "gueltig_bis": "Gültig bis",
+          "status": "Status"
+        },
+        "lookups": {
+          "status": {
+            "entwurf": "Entwurf",
+            "gueltig": "Gültig",
+            "zu_pruefen": "Erneut zu prüfen",
+            "ueberholt": "Überholt"
+          }
+        }
+      },
       "angebotsvorhaben": {
         "name": "Angebotsvorhaben",
         "app_id": "6af9c6623da9deca30ddb71c",
@@ -1769,6 +1823,8 @@ export const LABELS: Record<CoreLocale, LabelBundle> = {
         "fields": {
           "angebotspreis": "Angebotspreis in Euro",
           "akzeptierte_risiken": "Akzeptierte Risiken",
+          "vorgaengerversion": "Vorgängerversion",
+          "version": "Version",
           "vertragsbedingungen": "Vertragsbedingungen",
           "status": "Status",
           "herstellkosten": "Herstellkosten in Euro",
@@ -1787,6 +1843,36 @@ export const LABELS: Record<CoreLocale, LabelBundle> = {
             "intern_freigegeben": "Intern freigegeben",
             "vorgelegt": "Dem Kunden vorgelegt",
             "verworfen": "Verworfen"
+          }
+        }
+      },
+      "abhaengigkeiten": {
+        "name": "Abhängigkeiten",
+        "app_id": "6af9c88f1773adde5fbc8416",
+        "fields": {
+          "vorhaben": "Angebotsvorhaben",
+          "abhaengige_aufgabe": "Abhängige Aufgabe",
+          "grundlage_art": "Grundlage ist",
+          "grundlage_variante": "Variante als Grundlage",
+          "grundlage_aufgabe": "Aufgabe als Grundlage",
+          "aenderung": "Änderung an der Grundlage",
+          "pruefung_noetig": "Erneute Prüfung erforderlich",
+          "pruefung_status": "Stand der Prüfung",
+          "grundlage_anforderung": "Anforderung als Grundlage",
+          "grundlage_beitrag": "Fachbeitrag als Grundlage",
+          "geprueft_am": "Geprüft am"
+        },
+        "lookups": {
+          "grundlage_art": {
+            "anforderung": "Anforderung",
+            "beitrag": "Fachbeitrag",
+            "variante": "Angebotsvariante",
+            "aufgabe": "Andere Aufgabe"
+          },
+          "pruefung_status": {
+            "aktuell": "Aktuell, keine Prüfung nötig",
+            "offen": "Prüfung offen",
+            "geprueft": "Erneut geprüft"
           }
         }
       },
@@ -1833,10 +1919,38 @@ export const LABELS: Record<CoreLocale, LabelBundle> = {
           }
         }
       },
+      "angebotsuebernahmen": {
+        "name": "Angebotsübernahmen",
+        "app_id": "6af9c890bdf64a70739958dc",
+        "fields": {
+          "anforderung": "Übernommene Anforderung",
+          "beitrag": "Übernommener Fachbeitrag",
+          "vorhaben": "Angebotsvorhaben",
+          "variante": "Angebotsvariante",
+          "entscheidung": "Freigebende Entscheidung",
+          "inhaltsart": "Art des Inhalts",
+          "angebotstext": "Text im Angebot",
+          "uebernommen_von": "Übernommen von",
+          "uebernahmedatum": "Übernahmedatum",
+          "bemerkung": "Bemerkung"
+        },
+        "lookups": {
+          "inhaltsart": {
+            "anforderung": "Anforderung",
+            "beitrag": "Fachbeitrag",
+            "bedingung": "Bedingung",
+            "sonstiges": "Sonstiges"
+          }
+        }
+      },
       "entscheidungen": {
         "name": "Entscheidungen",
         "app_id": "6af9c6643d66392ac76e9866",
         "fields": {
+          "variante": "Angebotsvariante",
+          "freigabestatus": "Freigabestatus",
+          "freigeber": "Freigebende Person",
+          "freigabedatum": "Freigabedatum",
           "vorhaben": "Angebotsvorhaben",
           "frage": "Entscheidungsfrage",
           "ergebnis": "Ergebnis",
@@ -1849,6 +1963,12 @@ export const LABELS: Record<CoreLocale, LabelBundle> = {
           "aufgabe": "Zugehörige Aufgabe"
         },
         "lookups": {
+          "freigabestatus": {
+            "nicht_noetig": "Keine Freigabe nötig",
+            "offen": "Freigabe offen",
+            "freigegeben": "Freigegeben",
+            "abgelehnt": "Abgelehnt"
+          },
           "ergebnis": {
             "ja": "Ja",
             "nein": "Nein",
@@ -1880,16 +2000,70 @@ export const LABELS: Record<CoreLocale, LabelBundle> = {
             "vertrieb": "Sales",
             "konstruktion": "Engineering",
             "einkauf": "Purchasing",
-            "fertigung": "Manufacturing",
+            "fertigung": "Production",
             "ressourcenplanung": "Resource Planning",
             "qualitaet": "Quality",
             "recht": "Legal",
-            "geschaeftsleitung": "Executive Management"
+            "geschaeftsleitung": "Management"
+          }
+        }
+      },
+      "anforderungen": {
+        "name": "Requirements",
+        "app_id": "6af9c88d14e1a81ff0b2dbac",
+        "fields": {
+          "vorhaben": "Offer Project",
+          "titel": "Title",
+          "beschreibung": "Description",
+          "quellenart": "Source Type",
+          "quellenangabe": "Source Reference",
+          "version": "Version",
+          "status": "Status",
+          "gueltig_ab": "Valid From",
+          "vorgaengerversion": "Previous Version"
+        },
+        "lookups": {
+          "quellenart": {
+            "kundenanfrage": "Customer Inquiry",
+            "zeichnung": "Drawing",
+            "norm": "Standard or Regulation",
+            "gespraech": "Conversation or Meeting",
+            "intern": "Internal Specification"
+          },
+          "status": {
+            "entwurf": "Draft",
+            "gueltig": "Valid",
+            "ersetzt": "Superseded",
+            "entfallen": "Obsolete"
+          }
+        }
+      },
+      "fachbeitraege": {
+        "name": "Expert Contributions",
+        "app_id": "6af9c88e7dd46f00185bb8ba",
+        "fields": {
+          "vorhaben": "Offer Project",
+          "aufgabe": "Related Task",
+          "autor": "Author",
+          "anforderung": "Related Requirement",
+          "variante": "Related Offer Variant",
+          "inhalt": "Contribution Content",
+          "bedingungen": "Conditions",
+          "gueltig_von": "Valid From",
+          "gueltig_bis": "Valid Until",
+          "status": "Status"
+        },
+        "lookups": {
+          "status": {
+            "entwurf": "Draft",
+            "gueltig": "Valid",
+            "zu_pruefen": "Needs Re-review",
+            "ueberholt": "Outdated"
           }
         }
       },
       "angebotsvorhaben": {
-        "name": "Offer Projects",
+        "name": "Offer Project",
         "app_id": "6af9c6623da9deca30ddb71c",
         "fields": {
           "bezeichnung": "Project Name",
@@ -1903,7 +2077,7 @@ export const LABELS: Record<CoreLocale, LabelBundle> = {
           "prioritaet": "Priority",
           "auftragsvolumen": "Estimated Order Volume in Euro",
           "projektleitung": "Project Management",
-          "besonderheiten": "Special Notes"
+          "besonderheiten": "Special Features"
         },
         "lookups": {
           "phase": {
@@ -1931,12 +2105,14 @@ export const LABELS: Record<CoreLocale, LabelBundle> = {
         "fields": {
           "angebotspreis": "Offer Price in Euro",
           "akzeptierte_risiken": "Accepted Risks",
+          "vorgaengerversion": "Previous Version",
+          "version": "Version",
           "vertragsbedingungen": "Contract Terms",
           "status": "Status",
           "herstellkosten": "Manufacturing Costs in Euro",
           "beschaffungskosten": "Procurement Costs in Euro",
           "aufwand_stunden": "Effort in Hours",
-          "vorhaben": "Offer Projects",
+          "vorhaben": "Offer Project",
           "variantenbezeichnung": "Variant Name",
           "beschreibung": "Description",
           "menge": "Quantity",
@@ -1952,12 +2128,42 @@ export const LABELS: Record<CoreLocale, LabelBundle> = {
           }
         }
       },
+      "abhaengigkeiten": {
+        "name": "Dependencies",
+        "app_id": "6af9c88f1773adde5fbc8416",
+        "fields": {
+          "vorhaben": "Offer Project",
+          "abhaengige_aufgabe": "Dependent Task",
+          "grundlage_art": "Is Based On",
+          "grundlage_variante": "Variant as Basis",
+          "grundlage_aufgabe": "Task as Basis",
+          "aenderung": "Change to Basis",
+          "pruefung_noetig": "Re-review Required",
+          "pruefung_status": "Review Status",
+          "grundlage_anforderung": "Requirement as Basis",
+          "grundlage_beitrag": "Expert Contribution as Basis",
+          "geprueft_am": "Reviewed On"
+        },
+        "lookups": {
+          "grundlage_art": {
+            "anforderung": "Requirement",
+            "beitrag": "Expert Contribution",
+            "variante": "Offer Variant",
+            "aufgabe": "Other Task"
+          },
+          "pruefung_status": {
+            "aktuell": "Up to date, no review needed",
+            "offen": "Review Pending",
+            "geprueft": "Re-reviewed"
+          }
+        }
+      },
       "aufgaben": {
         "name": "Tasks",
         "app_id": "6af9c66423d64594313d3ada",
         "fields": {
           "titel": "Title",
-          "vorhaben": "Offer Projects",
+          "vorhaben": "Offer Project",
           "art": "Type of Investigation",
           "verantwortlicher": "Responsible Person",
           "faelligkeit": "Due Date",
@@ -1974,10 +2180,10 @@ export const LABELS: Record<CoreLocale, LabelBundle> = {
             "pruefentscheidung": "Review Decision",
             "lieferumfang": "Delivery Scope",
             "machbarkeit": "Technical Feasibility",
-            "herstellung_beschaffung": "Make or Buy",
+            "herstellung_beschaffung": "Manufacturing or Procurement",
             "ressourcen": "Resource Availability",
             "kosten": "Quantities, Effort and Costs",
-            "risiken": "Risks and Obligations",
+            "risiken": "Risks and Commitments",
             "variantenwahl": "Variant Selection",
             "sonstiges": "Other"
           },
@@ -1986,12 +2192,36 @@ export const LABELS: Record<CoreLocale, LabelBundle> = {
             "aktiv": "Active",
             "wartet": "Awaiting Response",
             "erledigt": "Done",
-            "entfallen": "Dropped"
+            "entfallen": "Obsolete"
           },
           "ausloeser": {
-            "vorgabe": "Requirement",
+            "vorgabe": "Specification",
             "folge": "Result of Another Task",
             "spontan": "Added Ad Hoc"
+          }
+        }
+      },
+      "angebotsuebernahmen": {
+        "name": "Offer Adoptions",
+        "app_id": "6af9c890bdf64a70739958dc",
+        "fields": {
+          "anforderung": "Adopted Requirement",
+          "beitrag": "Adopted Expert Contribution",
+          "vorhaben": "Offer Project",
+          "variante": "Offer Variant",
+          "entscheidung": "Approving Decision",
+          "inhaltsart": "Content Type",
+          "angebotstext": "Text in Offer",
+          "uebernommen_von": "Adopted By",
+          "uebernahmedatum": "Adoption Date",
+          "bemerkung": "Remark"
+        },
+        "lookups": {
+          "inhaltsart": {
+            "anforderung": "Requirement",
+            "beitrag": "Expert Contribution",
+            "bedingung": "Condition",
+            "sonstiges": "Other"
           }
         }
       },
@@ -1999,9 +2229,13 @@ export const LABELS: Record<CoreLocale, LabelBundle> = {
         "name": "Decisions",
         "app_id": "6af9c6643d66392ac76e9866",
         "fields": {
-          "vorhaben": "Offer Projects",
+          "variante": "Offer Variant",
+          "freigabestatus": "Approval Status",
+          "freigeber": "Approver",
+          "freigabedatum": "Approval Date",
+          "vorhaben": "Offer Project",
           "frage": "Decision Question",
-          "ergebnis": "Result",
+          "ergebnis": "Outcome",
           "begruendung": "Rationale",
           "bedingungen": "Conditions",
           "finanzielle_auswirkung": "Financial Impact in Euro",
@@ -2011,6 +2245,12 @@ export const LABELS: Record<CoreLocale, LabelBundle> = {
           "aufgabe": "Related Task"
         },
         "lookups": {
+          "freigabestatus": {
+            "nicht_noetig": "No Approval Needed",
+            "offen": "Approval Pending",
+            "freigegeben": "Approved",
+            "abgelehnt": "Rejected"
+          },
           "ergebnis": {
             "ja": "Yes",
             "nein": "No",

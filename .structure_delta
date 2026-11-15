@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "changes": [
+    {
+      "kind": "entity_added",
+      "entity": "anforderungen",
+      "name": "Anforderungen"
+    },
+    {
+      "kind": "entity_added",
+      "entity": "fachbeitraege",
+      "name": "Fachbeiträge"
+    },
+    {
+      "kind": "entity_added",
+      "entity": "abhaengigkeiten",
+      "name": "Abhängigkeiten"
+    },
+    {
+      "kind": "entity_added",
+      "entity": "angebotsuebernahmen",
+      "name": "Angebotsübernahmen"
+    },
+    {
+      "kind": "field_added",
+      "entity": "angebotsvarianten",
+      "field": "version",
+      "fulltype": "number",
+      "label": "Version"
+    },
+    {
+      "kind": "field_added",
+      "entity": "angebotsvarianten",
+      "field": "vorgaengerversion",
+      "fulltype": "applookup/select",
+      "label": "Vorgängerversion",
+      "target_entity": "angebotsvarianten"
+    },
+    {
+      "kind": "field_added",
+      "entity": "entscheidungen",
+      "field": "freigabedatum",
+      "fulltype": "date/date",
+      "label": "Freigabedatum"
+    },
+    {
+      "kind": "field_added",
+      "entity": "entscheidungen",
+      "field": "freigabestatus",
+      "fulltype": "lookup/select",
+      "label": "Freigabestatus"
+    },
+    {
+      "kind": "field_added",
+      "entity": "entscheidungen",
+      "field": "freigeber",
+      "fulltype": "applookup/select",
+      "label": "Freigebende Person",
+      "target_entity": "beteiligte"
+    },
+    {
+      "kind": "field_added",
+      "entity": "entscheidungen",
+      "field": "variante",
+      "fulltype": "applookup/select",
+      "label": "Angebotsvariante",
+      "target_entity": "angebotsvarianten"
+    }
+  ],
+  "counts": {
+    "entity_added": 4,
+    "field_added": 6
+  },
+  "harmless_only": false
+}

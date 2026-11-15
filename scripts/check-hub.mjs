@@ -31,17 +31,53 @@ const HUBS = {
     "component": "BeteiligteDetails",
     "file": "src/components/details/BeteiligteDetails.tsx",
     "satellites": [
+      "fachbeitraege",
       "angebotsvorhaben",
       "aufgaben",
+      "angebotsuebernahmen",
+      "entscheidungen",
       "entscheidungen"
+    ]
+  },
+  "anforderungen": {
+    "component": "AnforderungenDetails",
+    "file": "src/components/details/AnforderungenDetails.tsx",
+    "satellites": [
+      "fachbeitraege",
+      "abhaengigkeiten",
+      "angebotsuebernahmen"
     ]
   },
   "angebotsvorhaben": {
     "component": "AngebotsvorhabenDetails",
     "file": "src/components/details/AngebotsvorhabenDetails.tsx",
     "satellites": [
+      "anforderungen",
+      "fachbeitraege",
       "angebotsvarianten",
+      "abhaengigkeiten",
       "aufgaben",
+      "angebotsuebernahmen",
+      "entscheidungen"
+    ]
+  },
+  "angebotsvarianten": {
+    "component": "AngebotsvariantenDetails",
+    "file": "src/components/details/AngebotsvariantenDetails.tsx",
+    "satellites": [
+      "fachbeitraege",
+      "abhaengigkeiten",
+      "angebotsuebernahmen",
+      "entscheidungen"
+    ]
+  },
+  "aufgaben": {
+    "component": "AufgabenDetails",
+    "file": "src/components/details/AufgabenDetails.tsx",
+    "satellites": [
+      "fachbeitraege",
+      "abhaengigkeiten",
+      "abhaengigkeiten",
       "entscheidungen"
     ]
   }

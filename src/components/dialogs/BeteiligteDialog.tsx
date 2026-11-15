@@ -324,7 +324,7 @@ export function BeteiligteDialog({ open, onClose, onSubmit, defaultValues, recor
           inputMode="decimal"
           step="any"
           {...numberInputProps(formEnhancements, 'entscheidungsgrenze')}
-          placeholder="z. B. 5000"
+          placeholder=""
           value={fields.entscheidungsgrenze !== undefined ? fields.entscheidungsgrenze : (computedValues['entscheidungsgrenze'] ?? '')}
           onChange={e => setFields(f => ({ ...f, entscheidungsgrenze: clampNumberValue(formEnhancements, 'entscheidungsgrenze', e.target.value) }))}
         />
@@ -335,7 +335,7 @@ export function BeteiligteDialog({ open, onClose, onSubmit, defaultValues, recor
         <Label htmlFor="vorname">{labelFor('vorname')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="vorname"
-          placeholder="z. B. Anna"
+          placeholder=""
           value={fields.vorname ?? ''}
           onChange={e => setFields(f => ({ ...f, vorname: e.target.value }))}
           required
@@ -350,7 +350,7 @@ export function BeteiligteDialog({ open, onClose, onSubmit, defaultValues, recor
         <Label htmlFor="nachname">{labelFor('nachname')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="nachname"
-          placeholder="z. B. Müller"
+          placeholder=""
           value={fields.nachname ?? ''}
           onChange={e => setFields(f => ({ ...f, nachname: e.target.value }))}
           required
@@ -367,7 +367,7 @@ export function BeteiligteDialog({ open, onClose, onSubmit, defaultValues, recor
           id="email"
           type="email"
           inputMode="email"
-          placeholder="z. B. anna.mueller@firma.de"
+          placeholder=""
           value={fields.email ?? ''}
           onChange={e => setFields(f => ({ ...f, email: e.target.value }))}
         />
@@ -378,7 +378,7 @@ export function BeteiligteDialog({ open, onClose, onSubmit, defaultValues, recor
         <Label htmlFor="rolle">{labelFor('rolle')}</Label>
         <Input
           id="rolle"
-          placeholder="z. B. Projektleiterin"
+          placeholder=""
           value={fields.rolle ?? ''}
           onChange={e => setFields(f => ({ ...f, rolle: e.target.value }))}
         />
@@ -404,7 +404,7 @@ export function BeteiligteDialog({ open, onClose, onSubmit, defaultValues, recor
           value={lookupKey(fields.fachbereich) ?? ''}
           onValueChange={v => setFields(f => ({ ...f, fachbereich: v === 'none' ? undefined : v as any }))}
         >
-          <SelectTrigger id="fachbereich" className="max-sm:h-11"><SelectValue placeholder="z. B. Vertrieb, Einkauf" /></SelectTrigger>
+          <SelectTrigger id="fachbereich" className="max-sm:h-11"><SelectValue placeholder="" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="none">—</SelectItem>
             <SelectItem value="vertrieb">{lookupLabel('beteiligte', 'fachbereich', 'vertrieb') ?? 'Vertrieb'}</SelectItem>

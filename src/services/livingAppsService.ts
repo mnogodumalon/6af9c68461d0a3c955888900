@@ -3,7 +3,7 @@ import { APP_IDS, LOOKUP_OPTIONS, FIELD_TYPES } from '@/types/app';
 import { ensureUploadableImage } from '@/lib/ai';
 import { REST_URL, restFetch } from '@/lib/origin';
 import { reportFailedWrite } from '@/lib/sentry';
-import type { Beteiligte, Angebotsvorhaben, Angebotsvarianten, Aufgaben, Entscheidungen, CreateBeteiligte, CreateAngebotsvorhaben, CreateAngebotsvarianten, CreateAufgaben, CreateEntscheidungen } from '@/types/app';
+import type { Beteiligte, Anforderungen, Fachbeitraege, Angebotsvorhaben, Angebotsvarianten, Abhaengigkeiten, Aufgaben, Angebotsuebernahmen, Entscheidungen, CreateBeteiligte, CreateAnforderungen, CreateFachbeitraege, CreateAngebotsvorhaben, CreateAngebotsvarianten, CreateAbhaengigkeiten, CreateAufgaben, CreateAngebotsuebernahmen, CreateEntscheidungen } from '@/types/app';
 
 // Base Configuration — the host is a RUNTIME fact (lib/origin.ts):
 // a bundle copied to another LA instance must talk to THAT instance.
@@ -495,6 +495,82 @@ export class LivingAppsService {
     return callApi('DELETE', `/apps/${APP_IDS.BETEILIGTE}/records/${id}`);
   }
 
+  // --- ANFORDERUNGEN ---
+  static async getAnforderungen(): Promise<Anforderungen[]> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ANFORDERUNGEN}/records`);
+    const records = Object.entries(data).map(([id, rec]: [string, any]) => ({
+      record_id: id, ...rec,
+      createdat: rec.created_at ?? '', updatedat: rec.updated_at ?? null,
+    })) as Anforderungen[];
+    return hydrateRecords(records, 'anforderungen');
+  }
+  static async queryAnforderungen(q: RecordQuery = {}): Promise<Anforderungen[]> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ANFORDERUNGEN}/records${recordQueryString(q)}`, undefined, { signal: q.signal, silent: q.silent });
+    const records = Object.entries(data).map(([id, rec]: [string, any]) => ({
+      record_id: id, ...rec,
+      createdat: rec.created_at ?? '', updatedat: rec.updated_at ?? null,
+    })) as Anforderungen[];
+    return hydrateRecords(records, 'anforderungen');
+  }
+  static async countAnforderungen(filter?: string, signal?: AbortSignal): Promise<number> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ANFORDERUNGEN}/aggregate_records${recordQueryString({ filter })}${filter ? '&' : '?'}value=count()`, undefined, { signal, silent: true });
+    return parseAggregateCount(data);
+  }
+  static async getAnforderungenEntry(id: string): Promise<Anforderungen | undefined> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ANFORDERUNGEN}/records/${id}`);
+    const record = { record_id: data.id, ...data, createdat: data.created_at ?? '', updatedat: data.updated_at ?? null } as Anforderungen;
+    return hydrateRecords([record], 'anforderungen')[0];
+  }
+  static async createAnforderungenEntry(fields: CreateAnforderungen): Promise<MutationResult> {
+    const data = await callApi('POST', `/apps/${APP_IDS.ANFORDERUNGEN}/records`, { fields: cleanFieldsForApi(fields as any, 'anforderungen') });
+    return { ...data, record_id: data.id };
+  }
+  static async updateAnforderungenEntry(id: string, fields: Partial<CreateAnforderungen>): Promise<MutationResult> {
+    const data = await callApi('PATCH', `/apps/${APP_IDS.ANFORDERUNGEN}/records/${id}`, { fields: cleanFieldsForApi(fields as any, 'anforderungen') });
+    return { ...data, record_id: data.id };
+  }
+  static async deleteAnforderungenEntry(id: string) {
+    return callApi('DELETE', `/apps/${APP_IDS.ANFORDERUNGEN}/records/${id}`);
+  }
+
+  // --- FACHBEITRAEGE ---
+  static async getFachbeitraege(): Promise<Fachbeitraege[]> {
+    const data = await callApi('GET', `/apps/${APP_IDS.FACHBEITRAEGE}/records`);
+    const records = Object.entries(data).map(([id, rec]: [string, any]) => ({
+      record_id: id, ...rec,
+      createdat: rec.created_at ?? '', updatedat: rec.updated_at ?? null,
+    })) as Fachbeitraege[];
+    return hydrateRecords(records, 'fachbeitraege');
+  }
+  static async queryFachbeitraege(q: RecordQuery = {}): Promise<Fachbeitraege[]> {
+    const data = await callApi('GET', `/apps/${APP_IDS.FACHBEITRAEGE}/records${recordQueryString(q)}`, undefined, { signal: q.signal, silent: q.silent });
+    const records = Object.entries(data).map(([id, rec]: [string, any]) => ({
+      record_id: id, ...rec,
+      createdat: rec.created_at ?? '', updatedat: rec.updated_at ?? null,
+    })) as Fachbeitraege[];
+    return hydrateRecords(records, 'fachbeitraege');
+  }
+  static async countFachbeitraege(filter?: string, signal?: AbortSignal): Promise<number> {
+    const data = await callApi('GET', `/apps/${APP_IDS.FACHBEITRAEGE}/aggregate_records${recordQueryString({ filter })}${filter ? '&' : '?'}value=count()`, undefined, { signal, silent: true });
+    return parseAggregateCount(data);
+  }
+  static async getFachbeitraegeEntry(id: string): Promise<Fachbeitraege | undefined> {
+    const data = await callApi('GET', `/apps/${APP_IDS.FACHBEITRAEGE}/records/${id}`);
+    const record = { record_id: data.id, ...data, createdat: data.created_at ?? '', updatedat: data.updated_at ?? null } as Fachbeitraege;
+    return hydrateRecords([record], 'fachbeitraege')[0];
+  }
+  static async createFachbeitraegeEntry(fields: CreateFachbeitraege): Promise<MutationResult> {
+    const data = await callApi('POST', `/apps/${APP_IDS.FACHBEITRAEGE}/records`, { fields: cleanFieldsForApi(fields as any, 'fachbeitraege') });
+    return { ...data, record_id: data.id };
+  }
+  static async updateFachbeitraegeEntry(id: string, fields: Partial<CreateFachbeitraege>): Promise<MutationResult> {
+    const data = await callApi('PATCH', `/apps/${APP_IDS.FACHBEITRAEGE}/records/${id}`, { fields: cleanFieldsForApi(fields as any, 'fachbeitraege') });
+    return { ...data, record_id: data.id };
+  }
+  static async deleteFachbeitraegeEntry(id: string) {
+    return callApi('DELETE', `/apps/${APP_IDS.FACHBEITRAEGE}/records/${id}`);
+  }
+
   // --- ANGEBOTSVORHABEN ---
   static async getAngebotsvorhaben(): Promise<Angebotsvorhaben[]> {
     const data = await callApi('GET', `/apps/${APP_IDS.ANGEBOTSVORHABEN}/records`);
@@ -571,6 +647,44 @@ export class LivingAppsService {
     return callApi('DELETE', `/apps/${APP_IDS.ANGEBOTSVARIANTEN}/records/${id}`);
   }
 
+  // --- ABHAENGIGKEITEN ---
+  static async getAbhaengigkeiten(): Promise<Abhaengigkeiten[]> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ABHAENGIGKEITEN}/records`);
+    const records = Object.entries(data).map(([id, rec]: [string, any]) => ({
+      record_id: id, ...rec,
+      createdat: rec.created_at ?? '', updatedat: rec.updated_at ?? null,
+    })) as Abhaengigkeiten[];
+    return hydrateRecords(records, 'abhaengigkeiten');
+  }
+  static async queryAbhaengigkeiten(q: RecordQuery = {}): Promise<Abhaengigkeiten[]> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ABHAENGIGKEITEN}/records${recordQueryString(q)}`, undefined, { signal: q.signal, silent: q.silent });
+    const records = Object.entries(data).map(([id, rec]: [string, any]) => ({
+      record_id: id, ...rec,
+      createdat: rec.created_at ?? '', updatedat: rec.updated_at ?? null,
+    })) as Abhaengigkeiten[];
+    return hydrateRecords(records, 'abhaengigkeiten');
+  }
+  static async countAbhaengigkeiten(filter?: string, signal?: AbortSignal): Promise<number> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ABHAENGIGKEITEN}/aggregate_records${recordQueryString({ filter })}${filter ? '&' : '?'}value=count()`, undefined, { signal, silent: true });
+    return parseAggregateCount(data);
+  }
+  static async getAbhaengigkeitenEntry(id: string): Promise<Abhaengigkeiten | undefined> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ABHAENGIGKEITEN}/records/${id}`);
+    const record = { record_id: data.id, ...data, createdat: data.created_at ?? '', updatedat: data.updated_at ?? null } as Abhaengigkeiten;
+    return hydrateRecords([record], 'abhaengigkeiten')[0];
+  }
+  static async createAbhaengigkeitenEntry(fields: CreateAbhaengigkeiten): Promise<MutationResult> {
+    const data = await callApi('POST', `/apps/${APP_IDS.ABHAENGIGKEITEN}/records`, { fields: cleanFieldsForApi(fields as any, 'abhaengigkeiten') });
+    return { ...data, record_id: data.id };
+  }
+  static async updateAbhaengigkeitenEntry(id: string, fields: Partial<CreateAbhaengigkeiten>): Promise<MutationResult> {
+    const data = await callApi('PATCH', `/apps/${APP_IDS.ABHAENGIGKEITEN}/records/${id}`, { fields: cleanFieldsForApi(fields as any, 'abhaengigkeiten') });
+    return { ...data, record_id: data.id };
+  }
+  static async deleteAbhaengigkeitenEntry(id: string) {
+    return callApi('DELETE', `/apps/${APP_IDS.ABHAENGIGKEITEN}/records/${id}`);
+  }
+
   // --- AUFGABEN ---
   static async getAufgaben(): Promise<Aufgaben[]> {
     const data = await callApi('GET', `/apps/${APP_IDS.AUFGABEN}/records`);
@@ -607,6 +721,44 @@ export class LivingAppsService {
   }
   static async deleteAufgabenEntry(id: string) {
     return callApi('DELETE', `/apps/${APP_IDS.AUFGABEN}/records/${id}`);
+  }
+
+  // --- ANGEBOTSUEBERNAHMEN ---
+  static async getAngebotsuebernahmen(): Promise<Angebotsuebernahmen[]> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ANGEBOTSUEBERNAHMEN}/records`);
+    const records = Object.entries(data).map(([id, rec]: [string, any]) => ({
+      record_id: id, ...rec,
+      createdat: rec.created_at ?? '', updatedat: rec.updated_at ?? null,
+    })) as Angebotsuebernahmen[];
+    return hydrateRecords(records, 'angebotsuebernahmen');
+  }
+  static async queryAngebotsuebernahmen(q: RecordQuery = {}): Promise<Angebotsuebernahmen[]> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ANGEBOTSUEBERNAHMEN}/records${recordQueryString(q)}`, undefined, { signal: q.signal, silent: q.silent });
+    const records = Object.entries(data).map(([id, rec]: [string, any]) => ({
+      record_id: id, ...rec,
+      createdat: rec.created_at ?? '', updatedat: rec.updated_at ?? null,
+    })) as Angebotsuebernahmen[];
+    return hydrateRecords(records, 'angebotsuebernahmen');
+  }
+  static async countAngebotsuebernahmen(filter?: string, signal?: AbortSignal): Promise<number> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ANGEBOTSUEBERNAHMEN}/aggregate_records${recordQueryString({ filter })}${filter ? '&' : '?'}value=count()`, undefined, { signal, silent: true });
+    return parseAggregateCount(data);
+  }
+  static async getAngebotsuebernahmenEntry(id: string): Promise<Angebotsuebernahmen | undefined> {
+    const data = await callApi('GET', `/apps/${APP_IDS.ANGEBOTSUEBERNAHMEN}/records/${id}`);
+    const record = { record_id: data.id, ...data, createdat: data.created_at ?? '', updatedat: data.updated_at ?? null } as Angebotsuebernahmen;
+    return hydrateRecords([record], 'angebotsuebernahmen')[0];
+  }
+  static async createAngebotsuebernahmenEntry(fields: CreateAngebotsuebernahmen): Promise<MutationResult> {
+    const data = await callApi('POST', `/apps/${APP_IDS.ANGEBOTSUEBERNAHMEN}/records`, { fields: cleanFieldsForApi(fields as any, 'angebotsuebernahmen') });
+    return { ...data, record_id: data.id };
+  }
+  static async updateAngebotsuebernahmenEntry(id: string, fields: Partial<CreateAngebotsuebernahmen>): Promise<MutationResult> {
+    const data = await callApi('PATCH', `/apps/${APP_IDS.ANGEBOTSUEBERNAHMEN}/records/${id}`, { fields: cleanFieldsForApi(fields as any, 'angebotsuebernahmen') });
+    return { ...data, record_id: data.id };
+  }
+  static async deleteAngebotsuebernahmenEntry(id: string) {
+    return callApi('DELETE', `/apps/${APP_IDS.ANGEBOTSUEBERNAHMEN}/records/${id}`);
   }
 
   // --- ENTSCHEIDUNGEN ---

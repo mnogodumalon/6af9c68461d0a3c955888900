@@ -19,42 +19,62 @@ type RawMutation = { record_id: string; fields?: Record<string, unknown>; create
 
 const listers: Record<EntityKey, () => Promise<RawRecord[]>> = {
   'beteiligte': () => LivingAppsService.getBeteiligte() as Promise<RawRecord[]>,
+  'anforderungen': () => LivingAppsService.getAnforderungen() as Promise<RawRecord[]>,
+  'fachbeitraege': () => LivingAppsService.getFachbeitraege() as Promise<RawRecord[]>,
   'angebotsvorhaben': () => LivingAppsService.getAngebotsvorhaben() as Promise<RawRecord[]>,
   'angebotsvarianten': () => LivingAppsService.getAngebotsvarianten() as Promise<RawRecord[]>,
+  'abhaengigkeiten': () => LivingAppsService.getAbhaengigkeiten() as Promise<RawRecord[]>,
   'aufgaben': () => LivingAppsService.getAufgaben() as Promise<RawRecord[]>,
+  'angebotsuebernahmen': () => LivingAppsService.getAngebotsuebernahmen() as Promise<RawRecord[]>,
   'entscheidungen': () => LivingAppsService.getEntscheidungen() as Promise<RawRecord[]>,
 };
 
 /** The query/count half — the REST parameters the plain listers never send. */
 const queriers: Record<EntityKey, (q: RecordQuery) => Promise<RawRecord[]>> = {
   'beteiligte': q => LivingAppsService.queryBeteiligte(q) as Promise<RawRecord[]>,
+  'anforderungen': q => LivingAppsService.queryAnforderungen(q) as Promise<RawRecord[]>,
+  'fachbeitraege': q => LivingAppsService.queryFachbeitraege(q) as Promise<RawRecord[]>,
   'angebotsvorhaben': q => LivingAppsService.queryAngebotsvorhaben(q) as Promise<RawRecord[]>,
   'angebotsvarianten': q => LivingAppsService.queryAngebotsvarianten(q) as Promise<RawRecord[]>,
+  'abhaengigkeiten': q => LivingAppsService.queryAbhaengigkeiten(q) as Promise<RawRecord[]>,
   'aufgaben': q => LivingAppsService.queryAufgaben(q) as Promise<RawRecord[]>,
+  'angebotsuebernahmen': q => LivingAppsService.queryAngebotsuebernahmen(q) as Promise<RawRecord[]>,
   'entscheidungen': q => LivingAppsService.queryEntscheidungen(q) as Promise<RawRecord[]>,
 };
 
 const counters: Record<EntityKey, (filter?: string, signal?: AbortSignal) => Promise<number>> = {
   'beteiligte': (filter, signal) => LivingAppsService.countBeteiligte(filter, signal),
+  'anforderungen': (filter, signal) => LivingAppsService.countAnforderungen(filter, signal),
+  'fachbeitraege': (filter, signal) => LivingAppsService.countFachbeitraege(filter, signal),
   'angebotsvorhaben': (filter, signal) => LivingAppsService.countAngebotsvorhaben(filter, signal),
   'angebotsvarianten': (filter, signal) => LivingAppsService.countAngebotsvarianten(filter, signal),
+  'abhaengigkeiten': (filter, signal) => LivingAppsService.countAbhaengigkeiten(filter, signal),
   'aufgaben': (filter, signal) => LivingAppsService.countAufgaben(filter, signal),
+  'angebotsuebernahmen': (filter, signal) => LivingAppsService.countAngebotsuebernahmen(filter, signal),
   'entscheidungen': (filter, signal) => LivingAppsService.countEntscheidungen(filter, signal),
 };
 
 const creators: Record<EntityKey, (fields: Record<string, unknown>) => Promise<RawMutation>> = {
   'beteiligte': fields => LivingAppsService.createBeteiligteEntry(fields as never),
+  'anforderungen': fields => LivingAppsService.createAnforderungenEntry(fields as never),
+  'fachbeitraege': fields => LivingAppsService.createFachbeitraegeEntry(fields as never),
   'angebotsvorhaben': fields => LivingAppsService.createAngebotsvorhabenEntry(fields as never),
   'angebotsvarianten': fields => LivingAppsService.createAngebotsvariantenEntry(fields as never),
+  'abhaengigkeiten': fields => LivingAppsService.createAbhaengigkeitenEntry(fields as never),
   'aufgaben': fields => LivingAppsService.createAufgabenEntry(fields as never),
+  'angebotsuebernahmen': fields => LivingAppsService.createAngebotsuebernahmenEntry(fields as never),
   'entscheidungen': fields => LivingAppsService.createEntscheidungenEntry(fields as never),
 };
 
 const updaters: Record<EntityKey, (id: string, fields: Record<string, unknown>) => Promise<RawMutation>> = {
   'beteiligte': (id, fields) => LivingAppsService.updateBeteiligteEntry(id, fields as never),
+  'anforderungen': (id, fields) => LivingAppsService.updateAnforderungenEntry(id, fields as never),
+  'fachbeitraege': (id, fields) => LivingAppsService.updateFachbeitraegeEntry(id, fields as never),
   'angebotsvorhaben': (id, fields) => LivingAppsService.updateAngebotsvorhabenEntry(id, fields as never),
   'angebotsvarianten': (id, fields) => LivingAppsService.updateAngebotsvariantenEntry(id, fields as never),
+  'abhaengigkeiten': (id, fields) => LivingAppsService.updateAbhaengigkeitenEntry(id, fields as never),
   'aufgaben': (id, fields) => LivingAppsService.updateAufgabenEntry(id, fields as never),
+  'angebotsuebernahmen': (id, fields) => LivingAppsService.updateAngebotsuebernahmenEntry(id, fields as never),
   'entscheidungen': (id, fields) => LivingAppsService.updateEntscheidungenEntry(id, fields as never),
 };
 

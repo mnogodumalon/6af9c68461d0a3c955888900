@@ -1,8 +1,8 @@
 /**
  * useAufgabeBearbeitenFlow — the plumbing of the flow « Aufgabe bearbeiten », generated from the plan.
  *
- * Changes `aufgaben`: the record to change is picked (`flow.pick('aufgaben')`), the form is prefilled with its values; asks `ergebnis`, `status`, `folgeaufgabe_noetig`, `folgeaufgabe_hinweis`.
-Writes `aufgaben` (only when the person fills it) SEVERAL times — one record per entry of `flow.lists.aufgaben2`; the form is the editor of one entry: asks `vorhaben`, `titel`, `art`, `verantwortlicher`, `faelligkeit`, `fragestellung`, `ausloesende_aufgabe`; sets `ausloeser`, `status` itself.
+ * Changes `aufgaben`: the record to change is picked (`flow.pick('aufgaben')`), the form is prefilled with its values; asks `status`, `ergebnis`, `folgeaufgabe_noetig`, `folgeaufgabe_hinweis`.
+Writes `aufgaben` (only when the person fills it) SEVERAL times — one record per entry of `flow.lists.aufgaben2`; the form is the editor of one entry: asks `art`, `titel`, `vorhaben`, `faelligkeit`, `fragestellung`, `verantwortlicher`, `ausloesende_aufgabe`; sets `status`, `ausloeser` itself.
  * The hook OWNS: the form(s) with exactly these fields and the plan's required
  * ingredients, one record search per picked field (columns and filter from
  * the plan), and the submit plan with its fixed and derived values. A page
@@ -24,7 +24,7 @@ Writes `aufgaben` (only when the person fills it) SEVERAL times — one record p
  *   filled editor as one more entry and needs at least one entry.
  *
  *   const flow = useAufgabeBearbeitenFlow({
- *     steps: { aufgaben: 1, vorhaben: 2, verantwortlicher: 3, ausloesende_aufgabe: 4, ergebnis: 5, status: 5, folgeaufgabe_noetig: 5, folgeaufgabe_hinweis: 5, titel: 6, art: 6, faelligkeit: 6, fragestellung: 6 },
+ *     steps: { aufgaben: 1, vorhaben: 2, verantwortlicher: 3, ausloesende_aufgabe: 4, status: 5, ergebnis: 5, folgeaufgabe_noetig: 5, folgeaufgabe_hinweis: 5, art: 6, titel: 6, faelligkeit: 6, fragestellung: 6 },
  *     items: { aufgaben: r => ({ id: r.id, title: fieldText(r, 'titel') }) },
  *   });
  *   <IntentWizardShell forms={flow.forms} draftKey={flow.draftKey} …>
@@ -32,11 +32,11 @@ Writes `aufgaben` (only when the person fills it) SEVERAL times — one record p
  *     <EntitySelectStep {...flow.picks.vorhaben.select} {...flow.pick('vorhaben')} />
  *     <EntitySelectStep {...flow.picks.verantwortlicher.select} {...flow.pick('verantwortlicher')} />
  *     <EntitySelectStep {...flow.picks.ausloesende_aufgabe.select} {...flow.pick('ausloesende_aufgabe')} />
- *     <Bound form={flow.forms.aufgaben} name="ergebnis" />
  *     <Bound form={flow.forms.aufgaben} name="status" />
+ *     <Bound form={flow.forms.aufgaben} name="ergebnis" />
  *     <Bound form={flow.forms.aufgaben} name="folgeaufgabe_noetig" />
  *     <Bound form={flow.forms.aufgaben} name="folgeaufgabe_hinweis" />
- *     <ListEntries list={flow.lists.aufgaben2}><Bound form={flow.forms.aufgaben2} name="titel" /><Bound form={flow.forms.aufgaben2} name="art" /><Bound form={flow.forms.aufgaben2} name="faelligkeit" /><Bound form={flow.forms.aufgaben2} name="fragestellung" /></ListEntries>
+ *     <ListEntries list={flow.lists.aufgaben2}><Bound form={flow.forms.aufgaben2} name="art" /><Bound form={flow.forms.aufgaben2} name="titel" /><Bound form={flow.forms.aufgaben2} name="faelligkeit" /><Bound form={flow.forms.aufgaben2} name="fragestellung" /></ListEntries>
  *     <StepNav onNext={() => flow.validateStep(n)} />
  *     {!flow.submit.done && <SummaryStep forms={flow.formList} submit={flow.submit} variants={flow.actions} />}
  *     {flow.submit.result && <SuccessStep result={flow.submit.result} forms={flow.formList} submit={flow.submit} undo={flow.undo} />}
@@ -149,16 +149,16 @@ export function useAufgabeBearbeitenFlow(options: AufgabeBearbeitenFlowOptions =
   const variantRef = useRef<string | null>(null);   // the end action the person chose (PV-14)
   const [aufgabenTargetId, setAufgabenTargetId] = useState<string | null>(null);
   const aufgaben = useStepForm('aufgaben', {
-    fields: ["ergebnis", "status", "folgeaufgabe_noetig", "folgeaufgabe_hinweis"],
-    steps: only(steps, ["ergebnis", "status", "folgeaufgabe_noetig", "folgeaufgabe_hinweis"]) as Record<string, number>,
-    initial: only(options.initial as FormValues | undefined, ["ergebnis", "status", "folgeaufgabe_noetig", "folgeaufgabe_hinweis"]),
-    messages: only(options.messages as Record<string, string> | undefined, ["ergebnis", "status", "folgeaufgabe_noetig", "folgeaufgabe_hinweis"]),
+    fields: ["status", "ergebnis", "folgeaufgabe_noetig", "folgeaufgabe_hinweis"],
+    steps: only(steps, ["status", "ergebnis", "folgeaufgabe_noetig", "folgeaufgabe_hinweis"]) as Record<string, number>,
+    initial: only(options.initial as FormValues | undefined, ["status", "ergebnis", "folgeaufgabe_noetig", "folgeaufgabe_hinweis"]),
+    messages: only(options.messages as Record<string, string> | undefined, ["status", "ergebnis", "folgeaufgabe_noetig", "folgeaufgabe_hinweis"]),
   });
   const aufgaben2 = useStepForm('aufgaben', {
-    fields: ["vorhaben", "titel", "art", "verantwortlicher", "faelligkeit", "fragestellung", "ausloesende_aufgabe"],
-    steps: only(steps, ["vorhaben", "titel", "art", "verantwortlicher", "faelligkeit", "fragestellung", "ausloesende_aufgabe"]) as Record<string, number>,
-    initial: only(options.initial as FormValues | undefined, ["vorhaben", "titel", "art", "verantwortlicher", "faelligkeit", "fragestellung", "ausloesende_aufgabe"]),
-    messages: only(options.messages as Record<string, string> | undefined, ["vorhaben", "titel", "art", "verantwortlicher", "faelligkeit", "fragestellung", "ausloesende_aufgabe"]),
+    fields: ["art", "titel", "vorhaben", "faelligkeit", "fragestellung", "verantwortlicher", "ausloesende_aufgabe"],
+    steps: only(steps, ["art", "titel", "vorhaben", "faelligkeit", "fragestellung", "verantwortlicher", "ausloesende_aufgabe"]) as Record<string, number>,
+    initial: only(options.initial as FormValues | undefined, ["art", "titel", "vorhaben", "faelligkeit", "fragestellung", "verantwortlicher", "ausloesende_aufgabe"]),
+    messages: only(options.messages as Record<string, string> | undefined, ["art", "titel", "vorhaben", "faelligkeit", "fragestellung", "verantwortlicher", "ausloesende_aufgabe"]),
   });
   const [aufgaben2Entries, setAufgaben2Entries] = useState<ListEntry[]>(() => readJourneyExtra<ListEntry[]>('aufgabe-bearbeiten', 'list:aufgaben2') ?? []);
   useEffect(() => { writeJourneyExtra('aufgabe-bearbeiten', 'list:aufgaben2', aufgaben2Entries.length ? aufgaben2Entries : null); }, [aufgaben2Entries]);
@@ -278,8 +278,8 @@ export function useAufgabeBearbeitenFlow(options: AufgabeBearbeitenFlowOptions =
       key: `aufgaben2:${entry.id}`, entity: 'aufgaben', label: `${nounOne('aufgaben', entityLabel('aufgaben'))} ${i + 1}`,
       values: (): FormValues => ({
         ...entry.values,
-        ausloeser: policyFixedValue('aufgaben', 'ausloeser') ?? "folge",
         status: policyFixedValue('aufgaben', 'status') ?? "geplant",
+        ausloeser: policyFixedValue('aufgaben', 'ausloeser') ?? "folge",
       }),
       // the review lists every entry („1. Termin: …“); „Ändern“ leads back to the list's step
       review: () => entry.rows.map(r => ({ ...r, key: `aufgaben2:${entry.id}:${r.key}`, label: `${i + 1}. ${r.label}`, step: steps[r.key] })),
@@ -309,8 +309,8 @@ export function useAufgabeBearbeitenFlow(options: AufgabeBearbeitenFlowOptions =
       if (kind === 'bool') return raw === 'true' || raw === '1' || raw === 'ja';
       return raw;
     };
-    { const v = linkedParams.get('ergebnis'); if (v !== null && isEmptyValue(aufgaben.get('ergebnis'))) (aufgaben.set as (k: string, v: unknown) => void)('ergebnis', coerce(aufgaben, 'ergebnis', v)); }
     { const v = linkedParams.get('status'); if (v !== null && isEmptyValue(aufgaben.get('status'))) (aufgaben.set as (k: string, v: unknown) => void)('status', coerce(aufgaben, 'status', v)); }
+    { const v = linkedParams.get('ergebnis'); if (v !== null && isEmptyValue(aufgaben.get('ergebnis'))) (aufgaben.set as (k: string, v: unknown) => void)('ergebnis', coerce(aufgaben, 'ergebnis', v)); }
     { const v = linkedParams.get('folgeaufgabe_noetig'); if (v !== null && isEmptyValue(aufgaben.get('folgeaufgabe_noetig'))) (aufgaben.set as (k: string, v: unknown) => void)('folgeaufgabe_noetig', coerce(aufgaben, 'folgeaufgabe_noetig', v)); }
     { const v = linkedParams.get('folgeaufgabe_hinweis'); if (v !== null && isEmptyValue(aufgaben.get('folgeaufgabe_hinweis'))) (aufgaben.set as (k: string, v: unknown) => void)('folgeaufgabe_hinweis', coerce(aufgaben, 'folgeaufgabe_hinweis', v)); }
     {
@@ -364,7 +364,7 @@ export function useAufgabeBearbeitenFlow(options: AufgabeBearbeitenFlowOptions =
       onSelect: (id: string) => {
         setAufgabenTargetId(id);
         const rec = picks.aufgaben.recordOf(id);
-        if (rec) aufgaben.reset({ ergebnis: fieldText(rec, "ergebnis"), status: fieldLookup(rec, "status")?.key, folgeaufgabe_noetig: rec.fields["folgeaufgabe_noetig"] === true, folgeaufgabe_hinweis: fieldText(rec, "folgeaufgabe_hinweis"), });
+        if (rec) aufgaben.reset({ status: fieldLookup(rec, "status")?.key, ergebnis: fieldText(rec, "ergebnis"), folgeaufgabe_noetig: rec.fields["folgeaufgabe_noetig"] === true, folgeaufgabe_hinweis: fieldText(rec, "folgeaufgabe_hinweis"), });
         // survives a reload: in the draft's side data, and as `?record=` in the address (J-8)
         writeJourneyExtra('aufgabe-bearbeiten', 'target:aufgaben', id);
         mirrorRecordParam(id);
@@ -423,7 +423,7 @@ export function useAufgabeBearbeitenFlow(options: AufgabeBearbeitenFlowOptions =
   /** Validate every field the wizard asks in step `n` — for StepNav.onNext. */
   const validateStep = (n: number): boolean =>
     formList.every(f => f.validate(f.keys.filter(k => steps[k] === n)))    // the list's step: a filled editor is taken as one more entry; at least one entry is needed
-    && (steps['vorhaben'] !== n || (hasValues(aufgaben2) ? lists.aufgaben2.add() : aufgaben2Entries.length > 0 || aufgaben2.validate()))    && Object.entries(targets).every(([k, t]) => steps[k] !== n || !!t.selectedId);
+    && (steps['art'] !== n || (hasValues(aufgaben2) ? lists.aufgaben2.add() : aufgaben2Entries.length > 0 || aufgaben2.validate()))    && Object.entries(targets).every(([k, t]) => steps[k] !== n || !!t.selectedId);
   const reset = () => { submit.reset(); formList.forEach(f => f.reset()); aufgaben2.reset(); setAufgaben2Entries([]); setAufgabenTargetId(null); writeJourneyExtra('aufgabe-bearbeiten', 'target:aufgaben', null); mirrorRecordParam(null); };
 
   /** The ways this flow may end — spread as `variants={flow.actions}` onto <SummaryStep> (PV-14). */

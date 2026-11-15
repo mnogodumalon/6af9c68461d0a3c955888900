@@ -368,7 +368,7 @@ if (gridIdx >= 0) {
 // useEntityCrud() — legacy pages (preserved pre-EntityCrud overviews the
 // update flow keeps verbatim) are exempt by construction.
 {
-  const ENTITY_DIALOG_PASCALS = ["Beteiligte", "Angebotsvorhaben", "Angebotsvarianten", "Aufgaben", "Entscheidungen"];
+  const ENTITY_DIALOG_PASCALS = ["Beteiligte", "Anforderungen", "Fachbeitraege", "Angebotsvorhaben", "Angebotsvarianten", "Abhaengigkeiten", "Aufgaben", "Angebotsuebernahmen", "Entscheidungen"];
   if (usesEntityCrud) {
     if (!/import\s*\{[^}]*\buseEntityCrud\b[^}]*\}\s*from\s*'@\/components\/EntityCrud'/.test(code)) {
       errors.push("useEntityCrud() called but not imported from '@/components/EntityCrud' — keep the pre-generated import.");
@@ -415,7 +415,7 @@ if (gridIdx >= 0) {
 // owner's prompt asked for). The page opens the flow for the record:
 // flowActionFor(entity, field, id, value) from '@/config/plan'.
 {
-  const OWNED = {"updateAufgabenEntry": {"entity": "aufgaben", "fields": {"ergebnis": [{"slug": "aufgabe-bearbeiten"}], "status": [{"slug": "aufgabe-bearbeiten"}, {"slug": "aufgabe-bearbeiten", "value": "erledigt"}, {"slug": "aufgabe-bearbeiten", "value": "wartet"}], "folgeaufgabe_noetig": [{"slug": "aufgabe-bearbeiten"}], "folgeaufgabe_hinweis": [{"slug": "aufgabe-bearbeiten"}]}}, "updateAngebotsvorhabenEntry": {"entity": "angebotsvorhaben", "fields": {"phase": [{"slug": "entscheidung-festhalten"}, {"slug": "variante-vorlegen", "value": "angebot_abgegeben"}]}}};
+  const OWNED = {"updateAufgabenEntry": {"entity": "aufgaben", "fields": {"status": [{"slug": "aufgabe-bearbeiten"}, {"slug": "aufgabe-bearbeiten", "value": "erledigt"}, {"slug": "aufgabe-bearbeiten", "value": "wartet"}], "ergebnis": [{"slug": "aufgabe-bearbeiten"}], "folgeaufgabe_noetig": [{"slug": "aufgabe-bearbeiten"}], "folgeaufgabe_hinweis": [{"slug": "aufgabe-bearbeiten"}]}}, "updateAngebotsvorhabenEntry": {"entity": "angebotsvorhaben", "fields": {"phase": [{"slug": "entscheidung-festhalten"}, {"slug": "variante-vorlegen", "value": "angebot_abgegeben"}]}}};
   const callRe = /\b(update\w+Entry)\s*\(/g;
   let m;
   const hits = [];
@@ -447,7 +447,7 @@ if (gridIdx >= 0) {
 // says „not available“ (Abnahme 5, 04.11.2026: the moderation board's move to
 // FREIGEGEBEN never reached the built flow).
 {
-  const OWNED = {"updateAufgabenEntry": {"entity": "aufgaben", "fields": {"ergebnis": [{"slug": "aufgabe-bearbeiten"}], "status": [{"slug": "aufgabe-bearbeiten"}, {"slug": "aufgabe-bearbeiten", "value": "erledigt"}, {"slug": "aufgabe-bearbeiten", "value": "wartet"}], "folgeaufgabe_noetig": [{"slug": "aufgabe-bearbeiten"}], "folgeaufgabe_hinweis": [{"slug": "aufgabe-bearbeiten"}]}}, "updateAngebotsvorhabenEntry": {"entity": "angebotsvorhaben", "fields": {"phase": [{"slug": "entscheidung-festhalten"}, {"slug": "variante-vorlegen", "value": "angebot_abgegeben"}]}}};
+  const OWNED = {"updateAufgabenEntry": {"entity": "aufgaben", "fields": {"status": [{"slug": "aufgabe-bearbeiten"}, {"slug": "aufgabe-bearbeiten", "value": "erledigt"}, {"slug": "aufgabe-bearbeiten", "value": "wartet"}], "ergebnis": [{"slug": "aufgabe-bearbeiten"}], "folgeaufgabe_noetig": [{"slug": "aufgabe-bearbeiten"}], "folgeaufgabe_hinweis": [{"slug": "aufgabe-bearbeiten"}]}}, "updateAngebotsvorhabenEntry": {"entity": "angebotsvorhaben", "fields": {"phase": [{"slug": "entscheidung-festhalten"}, {"slug": "variante-vorlegen", "value": "angebot_abgegeben"}]}}};
   const owned = new Set();
   for (const own of Object.values(OWNED)) for (const f of Object.keys(own.fields)) owned.add(`${own.entity}.${f}`);
   const dead = [];

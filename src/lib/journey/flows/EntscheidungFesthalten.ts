@@ -1,7 +1,7 @@
 /**
  * useEntscheidungFesthaltenFlow — the plumbing of the flow « Entscheidung festhalten », generated from the plan.
  *
- * Writes `entscheidungen`: asks `vorhaben`, `aufgabe`, `entscheider`, `frage`, `ergebnis`, `begruendung`, `bedingungen`, `finanzielle_auswirkung`, `freigabe_noetig`; sets `entscheidungsdatum` itself.
+ * Writes `entscheidungen`: asks `frage`, `aufgabe`, `ergebnis`, `vorhaben`, `bedingungen`, `begruendung`, `entscheider`, `freigabe_noetig`, `finanzielle_auswirkung`; sets `entscheidungsdatum` itself.
 Changes `angebotsvorhaben` (only when the person fills it): the record to change is picked (`flow.pick('angebotsvorhaben')`), the form is prefilled with its values; asks `phase`.
  * The hook OWNS: the form(s) with exactly these fields and the plan's required
  * ingredients, one record search per picked field (columns and filter from
@@ -17,20 +17,20 @@ Changes `angebotsvorhaben` (only when the person fills it): the record to change
  *   messages  the sentence for an empty required field, per field
  *
  *   const flow = useEntscheidungFesthaltenFlow({
- *     steps: { angebotsvorhaben: 1, vorhaben: 2, aufgabe: 3, entscheider: 4, frage: 5, ergebnis: 5, begruendung: 5, bedingungen: 5, finanzielle_auswirkung: 5, freigabe_noetig: 5, phase: 5 },
- *     items: { vorhaben: r => ({ id: r.id, title: fieldText(r, 'bezeichnung') }) },
+ *     steps: { angebotsvorhaben: 1, aufgabe: 2, vorhaben: 3, entscheider: 4, frage: 5, ergebnis: 5, bedingungen: 5, begruendung: 5, freigabe_noetig: 5, finanzielle_auswirkung: 5, phase: 5 },
+ *     items: { aufgabe: r => ({ id: r.id, title: fieldText(r, 'titel') }) },
  *   });
  *   <IntentWizardShell forms={flow.forms} draftKey={flow.draftKey} …>
- *     <EntitySelectStep {...flow.picks.vorhaben.select} {...flow.pick('vorhaben')} />
  *     <EntitySelectStep {...flow.picks.aufgabe.select} {...flow.pick('aufgabe')} />
+ *     <EntitySelectStep {...flow.picks.vorhaben.select} {...flow.pick('vorhaben')} />
  *     <EntitySelectStep {...flow.picks.entscheider.select} {...flow.pick('entscheider')} />
  *     // the record this flow changes: <EntitySelectStep {...flow.picks.angebotsvorhaben.select} {...flow.pick('angebotsvorhaben')} />
  *     <Bound form={flow.forms.entscheidungen} name="frage" />
  *     <Bound form={flow.forms.entscheidungen} name="ergebnis" />
- *     <Bound form={flow.forms.entscheidungen} name="begruendung" />
  *     <Bound form={flow.forms.entscheidungen} name="bedingungen" />
- *     <Bound form={flow.forms.entscheidungen} name="finanzielle_auswirkung" />
+ *     <Bound form={flow.forms.entscheidungen} name="begruendung" />
  *     <Bound form={flow.forms.entscheidungen} name="freigabe_noetig" />
+ *     <Bound form={flow.forms.entscheidungen} name="finanzielle_auswirkung" />
  *     <Bound form={flow.forms.angebotsvorhaben} name="phase" />
  *     <StepNav onNext={() => flow.validateStep(n)} />
  *     {!flow.submit.done && <SummaryStep forms={flow.formList} submit={flow.submit} />}
@@ -68,22 +68,22 @@ export interface EntscheidungFesthaltenFlowOptions {
   messages?: Partial<Record<Key, string>>;
   /** How a search hit reads — the card's title/subtitle/status per pick. */
   items?: {
-    vorhaben?: (record: JourneyRecord, ctx: RefContext) => SelectItemLike;
     aufgabe?: (record: JourneyRecord, ctx: RefContext) => SelectItemLike;
+    vorhaben?: (record: JourneyRecord, ctx: RefContext) => SelectItemLike;
     entscheider?: (record: JourneyRecord, ctx: RefContext) => SelectItemLike;
     angebotsvorhaben?: (record: JourneyRecord, ctx: RefContext) => SelectItemLike;
   };
   /** A page-side narrowing per pick, on top of the plan's filter (J-3): the
    *  questions of the picked event, the open ones — `r => fieldRef(r, 'veranstaltung') === eventId`. */
   where?: {
-    vorhaben?: (record: JourneyRecord) => boolean;
     aufgabe?: (record: JourneyRecord) => boolean;
+    vorhaben?: (record: JourneyRecord) => boolean;
     entscheider?: (record: JourneyRecord) => boolean;
     angebotsvorhaben?: (record: JourneyRecord) => boolean;
   };
 }
 
-const DEFAULT_STEPS: Record<string, number> = {"angebotsvorhaben": 1, "aufgabe": 3, "bedingungen": 5, "begruendung": 5, "entscheider": 4, "ergebnis": 5, "finanzielle_auswirkung": 5, "frage": 5, "freigabe_noetig": 5, "phase": 5, "vorhaben": 2};
+const DEFAULT_STEPS: Record<string, number> = {"angebotsvorhaben": 1, "aufgabe": 2, "bedingungen": 5, "begruendung": 5, "entscheider": 4, "ergebnis": 5, "finanzielle_auswirkung": 5, "frage": 5, "freigabe_noetig": 5, "phase": 5, "vorhaben": 3};
 export const ENTSCHEIDUNGFESTHALTEN_REVIEW_STEP = 6;
 // a label of the plan in the page's language
 function labelIn(m: Record<string, string>): string {
@@ -137,10 +137,10 @@ export function useEntscheidungFesthaltenFlow(options: EntscheidungFesthaltenFlo
   const steps = { ...DEFAULT_STEPS, ...(options.steps ?? {}) } as Record<string, number>;
   const [angebotsvorhabenTargetId, setAngebotsvorhabenTargetId] = useState<string | null>(null);
   const entscheidungen = useStepForm('entscheidungen', {
-    fields: ["vorhaben", "aufgabe", "entscheider", "frage", "ergebnis", "begruendung", "bedingungen", "finanzielle_auswirkung", "freigabe_noetig"],
-    steps: only(steps, ["vorhaben", "aufgabe", "entscheider", "frage", "ergebnis", "begruendung", "bedingungen", "finanzielle_auswirkung", "freigabe_noetig"]) as Record<string, number>,
-    initial: only(options.initial as FormValues | undefined, ["vorhaben", "aufgabe", "entscheider", "frage", "ergebnis", "begruendung", "bedingungen", "finanzielle_auswirkung", "freigabe_noetig"]),
-    messages: only(options.messages as Record<string, string> | undefined, ["vorhaben", "aufgabe", "entscheider", "frage", "ergebnis", "begruendung", "bedingungen", "finanzielle_auswirkung", "freigabe_noetig"]),
+    fields: ["frage", "aufgabe", "ergebnis", "vorhaben", "bedingungen", "begruendung", "entscheider", "freigabe_noetig", "finanzielle_auswirkung"],
+    steps: only(steps, ["frage", "aufgabe", "ergebnis", "vorhaben", "bedingungen", "begruendung", "entscheider", "freigabe_noetig", "finanzielle_auswirkung"]) as Record<string, number>,
+    initial: only(options.initial as FormValues | undefined, ["frage", "aufgabe", "ergebnis", "vorhaben", "bedingungen", "begruendung", "entscheider", "freigabe_noetig", "finanzielle_auswirkung"]),
+    messages: only(options.messages as Record<string, string> | undefined, ["frage", "aufgabe", "ergebnis", "vorhaben", "bedingungen", "begruendung", "entscheider", "freigabe_noetig", "finanzielle_auswirkung"]),
   });
   const angebotsvorhaben = useStepForm('angebotsvorhaben', {
     fields: ["phase"],
@@ -160,14 +160,6 @@ export function useEntscheidungFesthaltenFlow(options: EntscheidungFesthaltenFlo
   const dependsOn = (dep: unknown, field: string) => (typeof dep === 'string' && /^[a-f0-9]{24}$/i.test(dep) ? refFilter(field, dep) : undefined);
   const dependsWhere = (r: JourneyRecord, field: string, dep: unknown) => typeof dep !== 'string' || dep === '' || fieldRef(r, field) === dep;
   const searches = {
-    vorhaben: useRecordSearch(servicePort, 'angebotsvorhaben', withPickPolicy('vorhaben', {
-      searchFields: ["bezeichnung", "kundenname"] as never,
-      // only the angebotsvorhaben of the entscheider picked before
-      filter: combineFilters("r.v_phase not in ['angebot_abgegeben', 'abgebrochen']", dependsOn(entscheidungen.get("entscheider"), 'projektleitung')),
-      where: (r: JourneyRecord) => (!["angebot_abgegeben", "abgebrochen"].includes(fieldLookup(r, "phase")?.key ?? '')) && dependsWhere(r, 'projektleitung', entscheidungen.get("entscheider")) && (options.where?.vorhaben?.(r) ?? true),
-      toItem: options.items?.vorhaben as never,
-      claim: 'entscheidungen.vorhaben',
-    })),
     aufgabe: useRecordSearch(servicePort, 'aufgaben', withPickPolicy('aufgabe', {
       searchFields: ["titel"] as never,
       // only the aufgaben of the vorhaben picked before
@@ -175,6 +167,14 @@ export function useEntscheidungFesthaltenFlow(options: EntscheidungFesthaltenFlo
       where: (r: JourneyRecord) => ((fieldLookup(r, "status")?.key ?? null) !== "entfallen") && dependsWhere(r, 'vorhaben', entscheidungen.get("vorhaben")) && (options.where?.aufgabe?.(r) ?? true),
       toItem: options.items?.aufgabe as never,
       claim: 'entscheidungen.aufgabe',
+    })),
+    vorhaben: useRecordSearch(servicePort, 'angebotsvorhaben', withPickPolicy('vorhaben', {
+      searchFields: ["bezeichnung", "kundenname"] as never,
+      // only the angebotsvorhaben of the entscheider picked before
+      filter: combineFilters("r.v_phase not in ['angebot_abgegeben', 'abgebrochen']", dependsOn(entscheidungen.get("entscheider"), 'projektleitung')),
+      where: (r: JourneyRecord) => (!["angebot_abgegeben", "abgebrochen"].includes(fieldLookup(r, "phase")?.key ?? '')) && dependsWhere(r, 'projektleitung', entscheidungen.get("entscheider")) && (options.where?.vorhaben?.(r) ?? true),
+      toItem: options.items?.vorhaben as never,
+      claim: 'entscheidungen.vorhaben',
     })),
     entscheider: useRecordSearch(servicePort, 'beteiligte', withPickPolicy('entscheider', {
       searchFields: ["vorname", "nachname"] as never,
@@ -201,8 +201,8 @@ export function useEntscheidungFesthaltenFlow(options: EntscheidungFesthaltenFlo
     w => whereSentence(w, f => labelOf(entity, f), (f, v) => optionsOf(entity, f).find(o => o.key === String(v))?.label ?? String(v)),
     `#/verwaltung/anwendung?line=intent:entscheidung-festhalten:read:${entity}`);
   const picks = {
-    vorhaben: { ...searches.vorhaben, select: { ...searches.vorhaben.select, create: false as boolean, hint: hintFor('vorhaben', 'angebotsvorhaben', {"conditions": [{"field": "phase", "op": "not_in", "value": ["angebot_abgegeben", "abgebrochen"]}], "mode": "all"} as PickWhere | null) } },
     aufgabe: { ...searches.aufgabe, select: { ...searches.aufgabe.select, create: false as boolean, hint: hintFor('aufgabe', 'aufgaben', {"conditions": [{"field": "status", "op": "ne", "value": "entfallen"}], "mode": "all"} as PickWhere | null) } },
+    vorhaben: { ...searches.vorhaben, select: { ...searches.vorhaben.select, create: false as boolean, hint: hintFor('vorhaben', 'angebotsvorhaben', {"conditions": [{"field": "phase", "op": "not_in", "value": ["angebot_abgegeben", "abgebrochen"]}], "mode": "all"} as PickWhere | null) } },
     entscheider: { ...searches.entscheider, select: { ...searches.entscheider.select, create: false as boolean, hint: hintFor('entscheider', 'beteiligte', {"conditions": [{"field": "aktiv", "op": "eq", "value": "true"}], "mode": "all"} as PickWhere | null) } },
     angebotsvorhaben: { ...searches.angebotsvorhaben, select: { ...searches.angebotsvorhaben.select, create: false as boolean, hint: hintFor('angebotsvorhaben', 'angebotsvorhaben', {"conditions": [{"field": "phase", "op": "not_in", "value": ["angebot_abgegeben", "abgebrochen"]}], "mode": "all"} as PickWhere | null) } },
   };
@@ -251,24 +251,11 @@ export function useEntscheidungFesthaltenFlow(options: EntscheidungFesthaltenFlo
     };
     { const v = linkedParams.get('frage'); if (v !== null && isEmptyValue(entscheidungen.get('frage'))) (entscheidungen.set as (k: string, v: unknown) => void)('frage', coerce(entscheidungen, 'frage', v)); }
     { const v = linkedParams.get('ergebnis'); if (v !== null && isEmptyValue(entscheidungen.get('ergebnis'))) (entscheidungen.set as (k: string, v: unknown) => void)('ergebnis', coerce(entscheidungen, 'ergebnis', v)); }
-    { const v = linkedParams.get('begruendung'); if (v !== null && isEmptyValue(entscheidungen.get('begruendung'))) (entscheidungen.set as (k: string, v: unknown) => void)('begruendung', coerce(entscheidungen, 'begruendung', v)); }
     { const v = linkedParams.get('bedingungen'); if (v !== null && isEmptyValue(entscheidungen.get('bedingungen'))) (entscheidungen.set as (k: string, v: unknown) => void)('bedingungen', coerce(entscheidungen, 'bedingungen', v)); }
-    { const v = linkedParams.get('finanzielle_auswirkung'); if (v !== null && isEmptyValue(entscheidungen.get('finanzielle_auswirkung'))) (entscheidungen.set as (k: string, v: unknown) => void)('finanzielle_auswirkung', coerce(entscheidungen, 'finanzielle_auswirkung', v)); }
+    { const v = linkedParams.get('begruendung'); if (v !== null && isEmptyValue(entscheidungen.get('begruendung'))) (entscheidungen.set as (k: string, v: unknown) => void)('begruendung', coerce(entscheidungen, 'begruendung', v)); }
     { const v = linkedParams.get('freigabe_noetig'); if (v !== null && isEmptyValue(entscheidungen.get('freigabe_noetig'))) (entscheidungen.set as (k: string, v: unknown) => void)('freigabe_noetig', coerce(entscheidungen, 'freigabe_noetig', v)); }
+    { const v = linkedParams.get('finanzielle_auswirkung'); if (v !== null && isEmptyValue(entscheidungen.get('finanzielle_auswirkung'))) (entscheidungen.set as (k: string, v: unknown) => void)('finanzielle_auswirkung', coerce(entscheidungen, 'finanzielle_auswirkung', v)); }
     { const v = linkedParams.get('phase'); if (v !== null && isEmptyValue(angebotsvorhaben.get('phase'))) (angebotsvorhaben.set as (k: string, v: unknown) => void)('phase', coerce(angebotsvorhaben, 'phase', v)); }
-    {
-      const cur = forms.entscheidungen.get('vorhaben');
-      const fromLink = linkedParams.get('vorhaben');
-      const unnamed = typeof cur === 'string' && cur !== '' && !forms.entscheidungen.labels[cur] ? cur : null;
-      const id = fromLink && isEmptyValue(cur) ? fromLink : unnamed;
-      if (id) void servicePort.get('angebotsvorhaben', id).then(rec => {
-        if (!on || !rec) return;
-        picks.vorhaben.adopt(rec);
-        const name = picks.vorhaben.labelOf(rec.id) ?? rec.id;
-        (forms.entscheidungen.set as (k: string, v: unknown, l?: string) => void)('vorhaben', rec.id, name);
-        prefillFrom('vorhaben', rec);
-      }).catch(() => undefined);
-    }
     {
       const cur = forms.entscheidungen.get('aufgabe');
       const fromLink = linkedParams.get('aufgabe');
@@ -280,6 +267,19 @@ export function useEntscheidungFesthaltenFlow(options: EntscheidungFesthaltenFlo
         const name = picks.aufgabe.labelOf(rec.id) ?? rec.id;
         (forms.entscheidungen.set as (k: string, v: unknown, l?: string) => void)('aufgabe', rec.id, name);
         prefillFrom('aufgabe', rec);
+      }).catch(() => undefined);
+    }
+    {
+      const cur = forms.entscheidungen.get('vorhaben');
+      const fromLink = linkedParams.get('vorhaben');
+      const unnamed = typeof cur === 'string' && cur !== '' && !forms.entscheidungen.labels[cur] ? cur : null;
+      const id = fromLink && isEmptyValue(cur) ? fromLink : unnamed;
+      if (id) void servicePort.get('angebotsvorhaben', id).then(rec => {
+        if (!on || !rec) return;
+        picks.vorhaben.adopt(rec);
+        const name = picks.vorhaben.labelOf(rec.id) ?? rec.id;
+        (forms.entscheidungen.set as (k: string, v: unknown, l?: string) => void)('vorhaben', rec.id, name);
+        prefillFrom('vorhaben', rec);
       }).catch(() => undefined);
     }
     {

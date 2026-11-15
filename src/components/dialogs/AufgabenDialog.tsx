@@ -402,7 +402,7 @@ export function AufgabenDialog({ open, onClose, onSubmit, defaultValues, recordI
         <Label htmlFor="titel">{labelFor('titel')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="titel"
-          placeholder="z. B. Lieferumfang klären"
+          placeholder=""
           value={fields.titel ?? ''}
           onChange={e => setFields(f => ({ ...f, titel: e.target.value }))}
           required
@@ -417,7 +417,7 @@ export function AufgabenDialog({ open, onClose, onSubmit, defaultValues, recordI
         <Label htmlFor="vorhaben">{labelFor('vorhaben')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Combobox
           id="vorhaben"
-          placeholder="Welches Vorhaben?"
+          placeholder=""
           items={angebotsvorhabenListAll.map(r => ({
             id: r.record_id,
             label: displayNameOf('angebotsvorhaben', r.fields as Record<string, unknown>) || r.record_id,
@@ -439,7 +439,7 @@ export function AufgabenDialog({ open, onClose, onSubmit, defaultValues, recordI
           value={lookupKey(fields.art) ?? ''}
           onValueChange={v => setFields(f => ({ ...f, art: v === 'none' ? undefined : v as any }))}
         >
-          <SelectTrigger id="art" className="max-sm:h-11"><SelectValue placeholder="z. B. Machbarkeit, Variantenwahl" /></SelectTrigger>
+          <SelectTrigger id="art" className="max-sm:h-11"><SelectValue placeholder="" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="none">—</SelectItem>
             <SelectItem value="pruefentscheidung">{lookupLabel('aufgaben', 'art', 'pruefentscheidung') ?? 'Prüfentscheidung'}</SelectItem>
@@ -463,7 +463,7 @@ export function AufgabenDialog({ open, onClose, onSubmit, defaultValues, recordI
         <Label htmlFor="verantwortlicher">{labelFor('verantwortlicher')}</Label>
         <Combobox
           id="verantwortlicher"
-          placeholder="Wer ist zuständig?"
+          placeholder=""
           items={beteiligteListAll.map(r => ({
             id: r.record_id,
             label: displayNameOf('beteiligte', r.fields as Record<string, unknown>) || r.record_id,
@@ -480,7 +480,7 @@ export function AufgabenDialog({ open, onClose, onSubmit, defaultValues, recordI
         <Label htmlFor="faelligkeit">{labelFor('faelligkeit')}</Label>
         <DatePicker
           id="faelligkeit"
-          placeholder="Bis wann ist es fällig?"
+          placeholder=""
           mode="date"
           value={fields.faelligkeit ?? null}
           onChange={v => setFields(f => ({ ...f, faelligkeit: v ?? undefined }))}
@@ -613,7 +613,7 @@ export function AufgabenDialog({ open, onClose, onSubmit, defaultValues, recordI
         <Label htmlFor="fragestellung">{labelFor('fragestellung')}</Label>
         <Textarea
           id="fragestellung"
-          placeholder="Was soll geklärt werden?"
+          placeholder=""
           value={fields.fragestellung ?? ''}
           onChange={e => setFields(f => ({ ...f, fragestellung: e.target.value }))}
           rows={3}
@@ -625,7 +625,7 @@ export function AufgabenDialog({ open, onClose, onSubmit, defaultValues, recordI
         <Label htmlFor="ergebnis">{labelFor('ergebnis')}</Label>
         <Textarea
           id="ergebnis"
-          placeholder="Was ist das Ergebnis?"
+          placeholder=""
           value={fields.ergebnis ?? ''}
           onChange={e => setFields(f => ({ ...f, ergebnis: e.target.value }))}
           rows={3}
@@ -650,7 +650,7 @@ export function AufgabenDialog({ open, onClose, onSubmit, defaultValues, recordI
         <Label htmlFor="folgeaufgabe_hinweis">{labelFor('folgeaufgabe_hinweis')}</Label>
         <Textarea
           id="folgeaufgabe_hinweis"
-          placeholder="Was folgt als Nächstes?"
+          placeholder=""
           value={fields.folgeaufgabe_hinweis ?? ''}
           onChange={e => setFields(f => ({ ...f, folgeaufgabe_hinweis: e.target.value }))}
           rows={3}
@@ -662,7 +662,7 @@ export function AufgabenDialog({ open, onClose, onSubmit, defaultValues, recordI
         <Label htmlFor="ausloesende_aufgabe">{labelFor('ausloesende_aufgabe')}</Label>
         <Combobox
           id="ausloesende_aufgabe"
-          placeholder="Welche Aufgabe löste das aus?"
+          placeholder=""
           items={aufgabenList.map(r => ({
             id: r.record_id,
             label: displayNameOf('aufgaben', r.fields as Record<string, unknown>) || r.record_id,

@@ -362,7 +362,7 @@ export function AngebotsvorhabenDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="bezeichnung">{labelFor('bezeichnung')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="bezeichnung"
-          placeholder="z. B. Hallenlüftung Werk 2"
+          placeholder=""
           value={fields.bezeichnung ?? ''}
           onChange={e => setFields(f => ({ ...f, bezeichnung: e.target.value }))}
           required
@@ -377,7 +377,7 @@ export function AngebotsvorhabenDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="kundenname">{labelFor('kundenname')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="kundenname"
-          placeholder="z. B. Müller GmbH"
+          placeholder=""
           value={fields.kundenname ?? ''}
           onChange={e => setFields(f => ({ ...f, kundenname: e.target.value }))}
           required
@@ -392,7 +392,7 @@ export function AngebotsvorhabenDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="anfragenummer">{labelFor('anfragenummer')}</Label>
         <Input
           id="anfragenummer"
-          placeholder="z. B. AN-2026-001"
+          placeholder=""
           value={fields.anfragenummer ?? ''}
           onChange={e => setFields(f => ({ ...f, anfragenummer: e.target.value }))}
         />
@@ -403,7 +403,7 @@ export function AngebotsvorhabenDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="eingangsdatum">{labelFor('eingangsdatum')}</Label>
         <DatePicker
           id="eingangsdatum"
-          placeholder="Wann kam die Anfrage?"
+          placeholder=""
           mode="date"
           value={fields.eingangsdatum ?? null}
           onChange={v => setFields(f => ({ ...f, eingangsdatum: v ?? undefined }))}
@@ -415,7 +415,7 @@ export function AngebotsvorhabenDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="abgabefrist">{labelFor('abgabefrist')}</Label>
         <DatePicker
           id="abgabefrist"
-          placeholder="Bis wann abgeben?"
+          placeholder=""
           mode="date"
           value={fields.abgabefrist ?? null}
           onChange={v => setFields(f => ({ ...f, abgabefrist: v ?? undefined }))}
@@ -427,7 +427,7 @@ export function AngebotsvorhabenDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="anfragebeschreibung">{labelFor('anfragebeschreibung')}</Label>
         <Textarea
           id="anfragebeschreibung"
-          placeholder="Worum geht es in der Anfrage?"
+          placeholder=""
           value={fields.anfragebeschreibung ?? ''}
           onChange={e => setFields(f => ({ ...f, anfragebeschreibung: e.target.value }))}
           rows={3}
@@ -439,7 +439,7 @@ export function AngebotsvorhabenDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="liefergegenstand">{labelFor('liefergegenstand')}</Label>
         <Textarea
           id="liefergegenstand"
-          placeholder="Was wird geliefert?"
+          placeholder=""
           value={fields.liefergegenstand ?? ''}
           onChange={e => setFields(f => ({ ...f, liefergegenstand: e.target.value }))}
           rows={3}
@@ -453,7 +453,7 @@ export function AngebotsvorhabenDialog({ open, onClose, onSubmit, defaultValues,
           value={lookupKey(fields.phase) ?? ''}
           onValueChange={v => setFields(f => ({ ...f, phase: v === 'none' ? undefined : v as any }))}
         >
-          <SelectTrigger id="phase" className="max-sm:h-11"><SelectValue placeholder="z. B. Machbarkeit, Kalkulation" /></SelectTrigger>
+          <SelectTrigger id="phase" className="max-sm:h-11"><SelectValue placeholder="" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="none">—</SelectItem>
             <SelectItem value="anfragepruefung">{lookupLabel('angebotsvorhaben', 'phase', 'anfragepruefung') ?? 'Anfrageprüfung'}</SelectItem>
@@ -528,7 +528,7 @@ export function AngebotsvorhabenDialog({ open, onClose, onSubmit, defaultValues,
           inputMode="decimal"
           step="any"
           {...numberInputProps(formEnhancements, 'auftragsvolumen')}
-          placeholder="z. B. 50000"
+          placeholder=""
           value={fields.auftragsvolumen !== undefined ? fields.auftragsvolumen : (computedValues['auftragsvolumen'] ?? '')}
           onChange={e => setFields(f => ({ ...f, auftragsvolumen: clampNumberValue(formEnhancements, 'auftragsvolumen', e.target.value) }))}
         />
@@ -539,7 +539,7 @@ export function AngebotsvorhabenDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="projektleitung">{labelFor('projektleitung')}</Label>
         <Combobox
           id="projektleitung"
-          placeholder="Wer leitet das Vorhaben?"
+          placeholder=""
           items={beteiligteListAll.map(r => ({
             id: r.record_id,
             label: displayNameOf('beteiligte', r.fields as Record<string, unknown>) || r.record_id,
@@ -556,7 +556,7 @@ export function AngebotsvorhabenDialog({ open, onClose, onSubmit, defaultValues,
         <Label htmlFor="besonderheiten">{labelFor('besonderheiten')}</Label>
         <Textarea
           id="besonderheiten"
-          placeholder="Was ist zu beachten?"
+          placeholder=""
           value={fields.besonderheiten ?? ''}
           onChange={e => setFields(f => ({ ...f, besonderheiten: e.target.value }))}
           rows={3}

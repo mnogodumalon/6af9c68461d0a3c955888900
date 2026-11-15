@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import type { Beteiligte, Angebotsvorhaben, Angebotsvarianten, Aufgaben, Entscheidungen } from '@/types/app';
+import type { Beteiligte, Anforderungen, Fachbeitraege, Angebotsvorhaben, Angebotsvarianten, Abhaengigkeiten, Aufgaben, Angebotsuebernahmen, Entscheidungen } from '@/types/app';
 import { LivingAppsService } from '@/services/livingAppsService';
 import { t } from '@/i18n';
 
@@ -14,7 +14,7 @@ import { t } from '@/i18n';
  *  There is no other mechanism (no `__optimistic`, no `mutate`).
  */
 /** Entities this hook can load — the same keys the journey layer uses. */
-export type DashboardEntity = 'beteiligte' | 'angebotsvorhaben' | 'angebotsvarianten' | 'aufgaben' | 'entscheidungen';
+export type DashboardEntity = 'beteiligte' | 'anforderungen' | 'fachbeitraege' | 'angebotsvorhaben' | 'angebotsvarianten' | 'abhaengigkeiten' | 'aufgaben' | 'angebotsuebernahmen' | 'entscheidungen';
 
 /** Silent re-read interval from the plan (generated): visitors or tools add records. */
 const LIVE_MS = 0;
@@ -36,9 +36,13 @@ export function useDashboardData(options: DashboardDataOptions = {}) {
   // on every render and would restart the fetch forever.
   const omitKey = (options.omit ?? []).slice().sort().join('|');
   const [beteiligte, setBeteiligte] = useState<Beteiligte[]>([]);
+  const [anforderungen, setAnforderungen] = useState<Anforderungen[]>([]);
+  const [fachbeitraege, setFachbeitraege] = useState<Fachbeitraege[]>([]);
   const [angebotsvorhaben, setAngebotsvorhaben] = useState<Angebotsvorhaben[]>([]);
   const [angebotsvarianten, setAngebotsvarianten] = useState<Angebotsvarianten[]>([]);
+  const [abhaengigkeiten, setAbhaengigkeiten] = useState<Abhaengigkeiten[]>([]);
   const [aufgaben, setAufgaben] = useState<Aufgaben[]>([]);
+  const [angebotsuebernahmen, setAngebotsuebernahmen] = useState<Angebotsuebernahmen[]>([]);
   const [entscheidungen, setEntscheidungen] = useState<Entscheidungen[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -62,10 +66,14 @@ export function useDashboardData(options: DashboardDataOptions = {}) {
       return null;
     };
     { const rows = pick<Beteiligte>(0, 'beteiligte'); if (rows) setBeteiligte(rows); }
-    { const rows = pick<Angebotsvorhaben>(1, 'angebotsvorhaben'); if (rows) setAngebotsvorhaben(rows); }
-    { const rows = pick<Angebotsvarianten>(2, 'angebotsvarianten'); if (rows) setAngebotsvarianten(rows); }
-    { const rows = pick<Aufgaben>(3, 'aufgaben'); if (rows) setAufgaben(rows); }
-    { const rows = pick<Entscheidungen>(4, 'entscheidungen'); if (rows) setEntscheidungen(rows); }
+    { const rows = pick<Anforderungen>(1, 'anforderungen'); if (rows) setAnforderungen(rows); }
+    { const rows = pick<Fachbeitraege>(2, 'fachbeitraege'); if (rows) setFachbeitraege(rows); }
+    { const rows = pick<Angebotsvorhaben>(3, 'angebotsvorhaben'); if (rows) setAngebotsvorhaben(rows); }
+    { const rows = pick<Angebotsvarianten>(4, 'angebotsvarianten'); if (rows) setAngebotsvarianten(rows); }
+    { const rows = pick<Abhaengigkeiten>(5, 'abhaengigkeiten'); if (rows) setAbhaengigkeiten(rows); }
+    { const rows = pick<Aufgaben>(6, 'aufgaben'); if (rows) setAufgaben(rows); }
+    { const rows = pick<Angebotsuebernahmen>(7, 'angebotsuebernahmen'); if (rows) setAngebotsuebernahmen(rows); }
+    { const rows = pick<Entscheidungen>(8, 'entscheidungen'); if (rows) setEntscheidungen(rows); }
     forbiddenRef.current = denied;
     setForbidden(prev => (prev.join('|') === denied.join('|') ? prev : denied));
     return failure;
@@ -77,9 +85,13 @@ export function useDashboardData(options: DashboardDataOptions = {}) {
     try {
       const failure = settle(await Promise.allSettled([
         omit.has('beteiligte') ? Promise.resolve([] as Beteiligte[]) : LivingAppsService.getBeteiligte(),
+        omit.has('anforderungen') ? Promise.resolve([] as Anforderungen[]) : LivingAppsService.getAnforderungen(),
+        omit.has('fachbeitraege') ? Promise.resolve([] as Fachbeitraege[]) : LivingAppsService.getFachbeitraege(),
         omit.has('angebotsvorhaben') ? Promise.resolve([] as Angebotsvorhaben[]) : LivingAppsService.getAngebotsvorhaben(),
         omit.has('angebotsvarianten') ? Promise.resolve([] as Angebotsvarianten[]) : LivingAppsService.getAngebotsvarianten(),
+        omit.has('abhaengigkeiten') ? Promise.resolve([] as Abhaengigkeiten[]) : LivingAppsService.getAbhaengigkeiten(),
         omit.has('aufgaben') ? Promise.resolve([] as Aufgaben[]) : LivingAppsService.getAufgaben(),
+        omit.has('angebotsuebernahmen') ? Promise.resolve([] as Angebotsuebernahmen[]) : LivingAppsService.getAngebotsuebernahmen(),
         omit.has('entscheidungen') ? Promise.resolve([] as Entscheidungen[]) : LivingAppsService.getEntscheidungen(),
       ]));
       if (failure) throw failure;
@@ -101,9 +113,13 @@ export function useDashboardData(options: DashboardDataOptions = {}) {
         // replaces what loaded or was refused
         settle(await Promise.allSettled([
           omit.has('beteiligte') ? Promise.resolve([] as Beteiligte[]) : LivingAppsService.getBeteiligte(),
+          omit.has('anforderungen') ? Promise.resolve([] as Anforderungen[]) : LivingAppsService.getAnforderungen(),
+          omit.has('fachbeitraege') ? Promise.resolve([] as Fachbeitraege[]) : LivingAppsService.getFachbeitraege(),
           omit.has('angebotsvorhaben') ? Promise.resolve([] as Angebotsvorhaben[]) : LivingAppsService.getAngebotsvorhaben(),
           omit.has('angebotsvarianten') ? Promise.resolve([] as Angebotsvarianten[]) : LivingAppsService.getAngebotsvarianten(),
+          omit.has('abhaengigkeiten') ? Promise.resolve([] as Abhaengigkeiten[]) : LivingAppsService.getAbhaengigkeiten(),
           omit.has('aufgaben') ? Promise.resolve([] as Aufgaben[]) : LivingAppsService.getAufgaben(),
+          omit.has('angebotsuebernahmen') ? Promise.resolve([] as Angebotsuebernahmen[]) : LivingAppsService.getAngebotsuebernahmen(),
           omit.has('entscheidungen') ? Promise.resolve([] as Entscheidungen[]) : LivingAppsService.getEntscheidungen(),
         ]));
       } catch {
@@ -126,9 +142,13 @@ export function useDashboardData(options: DashboardDataOptions = {}) {
       try {
         settle(await Promise.allSettled([
           !only.has('beteiligte') ? Promise.reject(SKIP) : omit.has('beteiligte') ? Promise.resolve([] as Beteiligte[]) : LivingAppsService.getBeteiligte(),
+          !only.has('anforderungen') ? Promise.reject(SKIP) : omit.has('anforderungen') ? Promise.resolve([] as Anforderungen[]) : LivingAppsService.getAnforderungen(),
+          !only.has('fachbeitraege') ? Promise.reject(SKIP) : omit.has('fachbeitraege') ? Promise.resolve([] as Fachbeitraege[]) : LivingAppsService.getFachbeitraege(),
           !only.has('angebotsvorhaben') ? Promise.reject(SKIP) : omit.has('angebotsvorhaben') ? Promise.resolve([] as Angebotsvorhaben[]) : LivingAppsService.getAngebotsvorhaben(),
           !only.has('angebotsvarianten') ? Promise.reject(SKIP) : omit.has('angebotsvarianten') ? Promise.resolve([] as Angebotsvarianten[]) : LivingAppsService.getAngebotsvarianten(),
+          !only.has('abhaengigkeiten') ? Promise.reject(SKIP) : omit.has('abhaengigkeiten') ? Promise.resolve([] as Abhaengigkeiten[]) : LivingAppsService.getAbhaengigkeiten(),
           !only.has('aufgaben') ? Promise.reject(SKIP) : omit.has('aufgaben') ? Promise.resolve([] as Aufgaben[]) : LivingAppsService.getAufgaben(),
+          !only.has('angebotsuebernahmen') ? Promise.reject(SKIP) : omit.has('angebotsuebernahmen') ? Promise.resolve([] as Angebotsuebernahmen[]) : LivingAppsService.getAngebotsuebernahmen(),
           !only.has('entscheidungen') ? Promise.reject(SKIP) : omit.has('entscheidungen') ? Promise.resolve([] as Entscheidungen[]) : LivingAppsService.getEntscheidungen(),
         ]));
       } catch {
@@ -151,11 +171,29 @@ export function useDashboardData(options: DashboardDataOptions = {}) {
     return m;
   }, [beteiligte]);
 
+  const anforderungenMap = useMemo(() => {
+    const m = new Map<string, Anforderungen>();
+    anforderungen.forEach(r => m.set(r.record_id, r));
+    return m;
+  }, [anforderungen]);
+
+  const fachbeitraegeMap = useMemo(() => {
+    const m = new Map<string, Fachbeitraege>();
+    fachbeitraege.forEach(r => m.set(r.record_id, r));
+    return m;
+  }, [fachbeitraege]);
+
   const angebotsvorhabenMap = useMemo(() => {
     const m = new Map<string, Angebotsvorhaben>();
     angebotsvorhaben.forEach(r => m.set(r.record_id, r));
     return m;
   }, [angebotsvorhaben]);
+
+  const angebotsvariantenMap = useMemo(() => {
+    const m = new Map<string, Angebotsvarianten>();
+    angebotsvarianten.forEach(r => m.set(r.record_id, r));
+    return m;
+  }, [angebotsvarianten]);
 
   const aufgabenMap = useMemo(() => {
     const m = new Map<string, Aufgaben>();
@@ -163,7 +201,13 @@ export function useDashboardData(options: DashboardDataOptions = {}) {
     return m;
   }, [aufgaben]);
 
-  return { beteiligte, setBeteiligte, angebotsvorhaben, setAngebotsvorhaben, angebotsvarianten, setAngebotsvarianten, aufgaben, setAufgaben, entscheidungen, setEntscheidungen, loading, error, fetchAll, forbidden, beteiligteMap, angebotsvorhabenMap, aufgabenMap };
+  const entscheidungenMap = useMemo(() => {
+    const m = new Map<string, Entscheidungen>();
+    entscheidungen.forEach(r => m.set(r.record_id, r));
+    return m;
+  }, [entscheidungen]);
+
+  return { beteiligte, setBeteiligte, anforderungen, setAnforderungen, fachbeitraege, setFachbeitraege, angebotsvorhaben, setAngebotsvorhaben, angebotsvarianten, setAngebotsvarianten, abhaengigkeiten, setAbhaengigkeiten, aufgaben, setAufgaben, angebotsuebernahmen, setAngebotsuebernahmen, entscheidungen, setEntscheidungen, loading, error, fetchAll, forbidden, beteiligteMap, anforderungenMap, fachbeitraegeMap, angebotsvorhabenMap, angebotsvariantenMap, aufgabenMap, entscheidungenMap };
 }
 
 /** The hook's return — the `data` prop of DashboardOverview in the Ready-Wrapper form. */

@@ -13,10 +13,14 @@
  *
  * Facts from the metadata — candidates, NOT decisions:
  *   - beteiligte: lookups fachbereich[vertrieb|konstruktion|einkauf|fertigung|ressourcenplanung|qualitaet|recht|geschaeftsleitung]
+ *   - anforderungen: applookups vorhaben→angebotsvorhaben, vorgaengerversion→anforderungen · lookups quellenart[kundenanfrage|zeichnung|norm|gespraech|intern], status[entwurf|gueltig|ersetzt|entfallen]
+ *   - fachbeitraege: date pairs gueltig_von+gueltig_bis · applookups vorhaben→angebotsvorhaben, aufgabe→aufgaben, autor→beteiligte, anforderung→anforderungen, variante→angebotsvarianten · lookups status[entwurf|gueltig|zu_pruefen|ueberholt]
  *   - angebotsvorhaben: applookups projektleitung→beteiligte · lookups phase[anfragepruefung|klaerung_lieferumfang|machbarkeit|beschaffung|ressourcen|kalkulation|risikobewertung|variantenentscheidung|angebot_abgegeben|abgebrochen], prioritaet[niedrig|normal|hoch]
- *   - angebotsvarianten: applookups vorhaben→angebotsvorhaben · lookups status[entwurf|intern_freigegeben|vorgelegt|verworfen]
+ *   - angebotsvarianten: applookups vorgaengerversion→angebotsvarianten, vorhaben→angebotsvorhaben · lookups status[entwurf|intern_freigegeben|vorgelegt|verworfen]
+ *   - abhaengigkeiten: applookups vorhaben→angebotsvorhaben, abhaengige_aufgabe→aufgaben, grundlage_variante→angebotsvarianten, grundlage_aufgabe→aufgaben, grundlage_anforderung→anforderungen, grundlage_beitrag→fachbeitraege · lookups grundlage_art[anforderung|beitrag|variante|aufgabe], pruefung_status[aktuell|offen|geprueft]
  *   - aufgaben: applookups vorhaben→angebotsvorhaben, verantwortlicher→beteiligte, ausloesende_aufgabe→aufgaben · lookups art[pruefentscheidung|lieferumfang|machbarkeit|herstellung_beschaffung|ressourcen|kosten|risiken|variantenwahl|sonstiges], status[geplant|aktiv|wartet|erledigt|entfallen], ausloeser[vorgabe|folge|spontan]
- *   - entscheidungen: applookups vorhaben→angebotsvorhaben, entscheider→beteiligte, aufgabe→aufgaben · lookups ergebnis[ja|nein|bedingt|vertagt]
+ *   - angebotsuebernahmen: applookups anforderung→anforderungen, beitrag→fachbeitraege, vorhaben→angebotsvorhaben, variante→angebotsvarianten, entscheidung→entscheidungen, uebernommen_von→beteiligte · lookups inhaltsart[anforderung|beitrag|bedingung|sonstiges]
+ *   - entscheidungen: applookups variante→angebotsvarianten, freigeber→beteiligte, vorhaben→angebotsvorhaben, entscheider→beteiligte, aufgabe→aufgaben · lookups freigabestatus[nicht_noetig|offen|freigegeben|abgelehnt], ergebnis[ja|nein|bedingt|vertagt]
  */
 import type { EntityKey } from '@/lib/journey/rules';
 

@@ -28,7 +28,7 @@
  *   useLiveRecord('buchungen', id)   // ONE record the same way (null while unknown)
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Beteiligte, Angebotsvorhaben, Angebotsvarianten, Aufgaben, Entscheidungen } from '@/types/app';
+import type { Beteiligte, Anforderungen, Fachbeitraege, Angebotsvorhaben, Angebotsvarianten, Abhaengigkeiten, Aufgaben, Angebotsuebernahmen, Entscheidungen } from '@/types/app';
 import { LivingAppsService, type RecordQuery } from '@/services/livingAppsService';
 import { Sentry } from '@/lib/sentry';
 
@@ -50,23 +50,31 @@ function reportLiveError(entity: string, query: string, err: Error): void {
   } catch { /* reporting never breaks the view */ }
 }
 
-export type LiveEntity = 'beteiligte' | 'angebotsvorhaben' | 'angebotsvarianten' | 'aufgaben' | 'entscheidungen';
+export type LiveEntity = 'beteiligte' | 'anforderungen' | 'fachbeitraege' | 'angebotsvorhaben' | 'angebotsvarianten' | 'abhaengigkeiten' | 'aufgaben' | 'angebotsuebernahmen' | 'entscheidungen';
 
 /** The row type of an entity — the same types useDashboardData hands out. */
 export type LiveRow<E extends LiveEntity> =
   E extends 'beteiligte' ? Beteiligte :
+  E extends 'anforderungen' ? Anforderungen :
+  E extends 'fachbeitraege' ? Fachbeitraege :
   E extends 'angebotsvorhaben' ? Angebotsvorhaben :
   E extends 'angebotsvarianten' ? Angebotsvarianten :
+  E extends 'abhaengigkeiten' ? Abhaengigkeiten :
   E extends 'aufgaben' ? Aufgaben :
+  E extends 'angebotsuebernahmen' ? Angebotsuebernahmen :
   E extends 'entscheidungen' ? Entscheidungen :
   never;
 
 type Loader = (q: RecordQuery) => Promise<{ record_id: string; fields: Record<string, unknown>; updatedat?: string | null }[]>;
 const LOADERS: Record<LiveEntity, Loader> = {
   'beteiligte': q => LivingAppsService.queryBeteiligte(q) as unknown as ReturnType<Loader>,
+  'anforderungen': q => LivingAppsService.queryAnforderungen(q) as unknown as ReturnType<Loader>,
+  'fachbeitraege': q => LivingAppsService.queryFachbeitraege(q) as unknown as ReturnType<Loader>,
   'angebotsvorhaben': q => LivingAppsService.queryAngebotsvorhaben(q) as unknown as ReturnType<Loader>,
   'angebotsvarianten': q => LivingAppsService.queryAngebotsvarianten(q) as unknown as ReturnType<Loader>,
+  'abhaengigkeiten': q => LivingAppsService.queryAbhaengigkeiten(q) as unknown as ReturnType<Loader>,
   'aufgaben': q => LivingAppsService.queryAufgaben(q) as unknown as ReturnType<Loader>,
+  'angebotsuebernahmen': q => LivingAppsService.queryAngebotsuebernahmen(q) as unknown as ReturnType<Loader>,
   'entscheidungen': q => LivingAppsService.queryEntscheidungen(q) as unknown as ReturnType<Loader>,
 };
 

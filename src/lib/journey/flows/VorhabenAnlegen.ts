@@ -1,8 +1,8 @@
 /**
  * useVorhabenAnlegenFlow — the plumbing of the flow « Angebotsvorhaben anlegen », generated from the plan.
  *
- * Writes `angebotsvorhaben`: asks `bezeichnung`, `kundenname`, `anfragenummer`, `eingangsdatum`, `abgabefrist`, `anfragebeschreibung`, `auftragsvolumen`, `prioritaet`, `projektleitung`; sets `phase` itself.
-Writes `aufgaben`: asks `titel`, `verantwortlicher`, `faelligkeit`, `fragestellung`; sets `art`, `status`, `ausloeser` itself; links `vorhaben` ← the created `angebotsvorhaben`.
+ * Writes `angebotsvorhaben`: asks `kundenname`, `prioritaet`, `abgabefrist`, `bezeichnung`, `anfragenummer`, `eingangsdatum`, `projektleitung`, `auftragsvolumen`, `anfragebeschreibung`; sets `phase` itself.
+Writes `aufgaben`: asks `titel`, `faelligkeit`, `fragestellung`, `verantwortlicher`; sets `art`, `status`, `ausloeser` itself; links `vorhaben` ← the created `angebotsvorhaben`.
  * The hook OWNS: the form(s) with exactly these fields and the plan's required
  * ingredients, one record search per picked field (columns and filter from
  * the plan), and the submit plan with its fixed and derived values. A page
@@ -17,20 +17,20 @@ Writes `aufgaben`: asks `titel`, `verantwortlicher`, `faelligkeit`, `fragestellu
  *   messages  the sentence for an empty required field, per field
  *
  *   const flow = useVorhabenAnlegenFlow({
- *     steps: { projektleitung: 1, verantwortlicher: 2, bezeichnung: 3, kundenname: 3, anfragenummer: 3, eingangsdatum: 3, abgabefrist: 3, anfragebeschreibung: 3, auftragsvolumen: 3, prioritaet: 3, titel: 3, faelligkeit: 3, fragestellung: 3 },
+ *     steps: { projektleitung: 1, verantwortlicher: 2, kundenname: 3, prioritaet: 3, abgabefrist: 3, bezeichnung: 3, anfragenummer: 3, eingangsdatum: 3, auftragsvolumen: 3, anfragebeschreibung: 3, titel: 3, faelligkeit: 3, fragestellung: 3 },
  *     items: { projektleitung: r => ({ id: r.id, title: fieldText(r, 'vorname') }) },
  *   });
  *   <IntentWizardShell forms={flow.forms} draftKey={flow.draftKey} …>
  *     <EntitySelectStep {...flow.picks.projektleitung.select} {...flow.pick('projektleitung')} />
  *     <EntitySelectStep {...flow.picks.verantwortlicher.select} {...flow.pick('verantwortlicher')} />
- *     <Bound form={flow.forms.angebotsvorhaben} name="bezeichnung" />
  *     <Bound form={flow.forms.angebotsvorhaben} name="kundenname" />
+ *     <Bound form={flow.forms.angebotsvorhaben} name="prioritaet" />
+ *     <Bound form={flow.forms.angebotsvorhaben} name="abgabefrist" />
+ *     <Bound form={flow.forms.angebotsvorhaben} name="bezeichnung" />
  *     <Bound form={flow.forms.angebotsvorhaben} name="anfragenummer" />
  *     <Bound form={flow.forms.angebotsvorhaben} name="eingangsdatum" />
- *     <Bound form={flow.forms.angebotsvorhaben} name="abgabefrist" />
- *     <Bound form={flow.forms.angebotsvorhaben} name="anfragebeschreibung" />
  *     <Bound form={flow.forms.angebotsvorhaben} name="auftragsvolumen" />
- *     <Bound form={flow.forms.angebotsvorhaben} name="prioritaet" />
+ *     <Bound form={flow.forms.angebotsvorhaben} name="anfragebeschreibung" />
  *     <Bound form={flow.forms.aufgaben} name="titel" />
  *     <Bound form={flow.forms.aufgaben} name="faelligkeit" />
  *     <Bound form={flow.forms.aufgaben} name="fragestellung" />
@@ -112,16 +112,16 @@ function hasValues(form: StepForm): boolean {
 export function useVorhabenAnlegenFlow(options: VorhabenAnlegenFlowOptions = {}) {
   const steps = { ...DEFAULT_STEPS, ...(options.steps ?? {}) } as Record<string, number>;
   const angebotsvorhaben = useStepForm('angebotsvorhaben', {
-    fields: ["bezeichnung", "kundenname", "anfragenummer", "eingangsdatum", "abgabefrist", "anfragebeschreibung", "auftragsvolumen", "prioritaet", "projektleitung"],
-    steps: only(steps, ["bezeichnung", "kundenname", "anfragenummer", "eingangsdatum", "abgabefrist", "anfragebeschreibung", "auftragsvolumen", "prioritaet", "projektleitung"]) as Record<string, number>,
-    initial: only(options.initial as FormValues | undefined, ["bezeichnung", "kundenname", "anfragenummer", "eingangsdatum", "abgabefrist", "anfragebeschreibung", "auftragsvolumen", "prioritaet", "projektleitung"]),
-    messages: only(options.messages as Record<string, string> | undefined, ["bezeichnung", "kundenname", "anfragenummer", "eingangsdatum", "abgabefrist", "anfragebeschreibung", "auftragsvolumen", "prioritaet", "projektleitung"]),
+    fields: ["kundenname", "prioritaet", "abgabefrist", "bezeichnung", "anfragenummer", "eingangsdatum", "projektleitung", "auftragsvolumen", "anfragebeschreibung"],
+    steps: only(steps, ["kundenname", "prioritaet", "abgabefrist", "bezeichnung", "anfragenummer", "eingangsdatum", "projektleitung", "auftragsvolumen", "anfragebeschreibung"]) as Record<string, number>,
+    initial: only(options.initial as FormValues | undefined, ["kundenname", "prioritaet", "abgabefrist", "bezeichnung", "anfragenummer", "eingangsdatum", "projektleitung", "auftragsvolumen", "anfragebeschreibung"]),
+    messages: only(options.messages as Record<string, string> | undefined, ["kundenname", "prioritaet", "abgabefrist", "bezeichnung", "anfragenummer", "eingangsdatum", "projektleitung", "auftragsvolumen", "anfragebeschreibung"]),
   });
   const aufgaben = useStepForm('aufgaben', {
-    fields: ["titel", "verantwortlicher", "faelligkeit", "fragestellung"],
-    steps: only(steps, ["titel", "verantwortlicher", "faelligkeit", "fragestellung"]) as Record<string, number>,
-    initial: only(options.initial as FormValues | undefined, ["titel", "verantwortlicher", "faelligkeit", "fragestellung"]),
-    messages: only(options.messages as Record<string, string> | undefined, ["titel", "verantwortlicher", "faelligkeit", "fragestellung"]),
+    fields: ["titel", "faelligkeit", "fragestellung", "verantwortlicher"],
+    steps: only(steps, ["titel", "faelligkeit", "fragestellung", "verantwortlicher"]) as Record<string, number>,
+    initial: only(options.initial as FormValues | undefined, ["titel", "faelligkeit", "fragestellung", "verantwortlicher"]),
+    messages: only(options.messages as Record<string, string> | undefined, ["titel", "faelligkeit", "fragestellung", "verantwortlicher"]),
   });
   const forms: VorhabenAnlegenForms = { angebotsvorhaben, aufgaben };
   // the editor of a list is not a record of its own: the review and the success
@@ -213,14 +213,14 @@ export function useVorhabenAnlegenFlow(options: VorhabenAnlegenFlowOptions = {})
       if (kind === 'bool') return raw === 'true' || raw === '1' || raw === 'ja';
       return raw;
     };
-    { const v = linkedParams.get('bezeichnung'); if (v !== null && isEmptyValue(angebotsvorhaben.get('bezeichnung'))) (angebotsvorhaben.set as (k: string, v: unknown) => void)('bezeichnung', coerce(angebotsvorhaben, 'bezeichnung', v)); }
     { const v = linkedParams.get('kundenname'); if (v !== null && isEmptyValue(angebotsvorhaben.get('kundenname'))) (angebotsvorhaben.set as (k: string, v: unknown) => void)('kundenname', coerce(angebotsvorhaben, 'kundenname', v)); }
+    { const v = linkedParams.get('prioritaet'); if (v !== null && isEmptyValue(angebotsvorhaben.get('prioritaet'))) (angebotsvorhaben.set as (k: string, v: unknown) => void)('prioritaet', coerce(angebotsvorhaben, 'prioritaet', v)); }
+    { const v = linkedParams.get('abgabefrist'); if (v !== null && isEmptyValue(angebotsvorhaben.get('abgabefrist'))) (angebotsvorhaben.set as (k: string, v: unknown) => void)('abgabefrist', coerce(angebotsvorhaben, 'abgabefrist', v)); }
+    { const v = linkedParams.get('bezeichnung'); if (v !== null && isEmptyValue(angebotsvorhaben.get('bezeichnung'))) (angebotsvorhaben.set as (k: string, v: unknown) => void)('bezeichnung', coerce(angebotsvorhaben, 'bezeichnung', v)); }
     { const v = linkedParams.get('anfragenummer'); if (v !== null && isEmptyValue(angebotsvorhaben.get('anfragenummer'))) (angebotsvorhaben.set as (k: string, v: unknown) => void)('anfragenummer', coerce(angebotsvorhaben, 'anfragenummer', v)); }
     { const v = linkedParams.get('eingangsdatum'); if (v !== null && isEmptyValue(angebotsvorhaben.get('eingangsdatum'))) (angebotsvorhaben.set as (k: string, v: unknown) => void)('eingangsdatum', coerce(angebotsvorhaben, 'eingangsdatum', v)); }
-    { const v = linkedParams.get('abgabefrist'); if (v !== null && isEmptyValue(angebotsvorhaben.get('abgabefrist'))) (angebotsvorhaben.set as (k: string, v: unknown) => void)('abgabefrist', coerce(angebotsvorhaben, 'abgabefrist', v)); }
-    { const v = linkedParams.get('anfragebeschreibung'); if (v !== null && isEmptyValue(angebotsvorhaben.get('anfragebeschreibung'))) (angebotsvorhaben.set as (k: string, v: unknown) => void)('anfragebeschreibung', coerce(angebotsvorhaben, 'anfragebeschreibung', v)); }
     { const v = linkedParams.get('auftragsvolumen'); if (v !== null && isEmptyValue(angebotsvorhaben.get('auftragsvolumen'))) (angebotsvorhaben.set as (k: string, v: unknown) => void)('auftragsvolumen', coerce(angebotsvorhaben, 'auftragsvolumen', v)); }
-    { const v = linkedParams.get('prioritaet'); if (v !== null && isEmptyValue(angebotsvorhaben.get('prioritaet'))) (angebotsvorhaben.set as (k: string, v: unknown) => void)('prioritaet', coerce(angebotsvorhaben, 'prioritaet', v)); }
+    { const v = linkedParams.get('anfragebeschreibung'); if (v !== null && isEmptyValue(angebotsvorhaben.get('anfragebeschreibung'))) (angebotsvorhaben.set as (k: string, v: unknown) => void)('anfragebeschreibung', coerce(angebotsvorhaben, 'anfragebeschreibung', v)); }
     { const v = linkedParams.get('titel'); if (v !== null && isEmptyValue(aufgaben.get('titel'))) (aufgaben.set as (k: string, v: unknown) => void)('titel', coerce(aufgaben, 'titel', v)); }
     { const v = linkedParams.get('faelligkeit'); if (v !== null && isEmptyValue(aufgaben.get('faelligkeit'))) (aufgaben.set as (k: string, v: unknown) => void)('faelligkeit', coerce(aufgaben, 'faelligkeit', v)); }
     { const v = linkedParams.get('fragestellung'); if (v !== null && isEmptyValue(aufgaben.get('fragestellung'))) (aufgaben.set as (k: string, v: unknown) => void)('fragestellung', coerce(aufgaben, 'fragestellung', v)); }

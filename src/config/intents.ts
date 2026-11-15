@@ -43,11 +43,11 @@ export interface IntentLink {
 
 export const INTENTS: IntentLink[] = [
   // <custom:intents>
-  { path: '/intents/vorhaben-anlegen', label: { de: 'Angebotsvorhaben anlegen', en: 'Create offer project' }, icon: IconFilePlus, description: 'Eine neue Kundenanfrage als Angebotsvorhaben erfassen, Projektleitung zuordnen und die erste Prüfaufgabe planen.' },
-  { path: '/intents/aufgabe-bearbeiten', label: { de: 'Aufgabe bearbeiten', en: 'Work on task' }, icon: IconChecklist, description: 'Das Ergebnis einer Aufgabe festhalten und bei Bedarf direkt eine Folgeaufgabe für einen anderen Fachbereich anlegen.' },
-  { path: '/intents/entscheidung-festhalten', label: { de: 'Entscheidung festhalten', en: 'Record decision' }, icon: IconGavel, description: 'Eine Entscheidung zu einem Vorhaben mit Ergebnis, Begründung und finanzieller Auswirkung erfassen und die Phase weiterführen.' },
-  { path: '/intents/variante-erfassen', label: { de: 'Angebotsvariante erfassen', en: 'Add offer variant' }, icon: IconCopyPlus, description: 'Eine neue Angebotsvariante zu einem Vorhaben anlegen, etwa bei akzeptierter Teillieferung, mit Mengen, Kosten und Liefertermin.' },
-  { path: '/intents/variante-vorlegen', label: { de: 'Variante dem Kunden vorlegen', en: 'Present variant to customer' }, icon: IconSend, description: 'Die gewählte Variante als vorgelegt markieren, die übrigen verwerfen und das Vorhaben als abgegeben abschließen.' },
+  { path: '/intents/vorhaben-anlegen', label: { de: 'Angebotsvorhaben anlegen', en: 'Create offer project' }, icon: IconFilePlus, description: { de: 'Eine neue Kundenanfrage als Angebotsvorhaben erfassen, Projektleitung zuordnen und die erste Prüfaufgabe planen.', en: 'Record a new customer inquiry as a quote project, assign a project lead and plan the first review task.' } },
+  { path: '/intents/aufgabe-bearbeiten', label: { de: 'Aufgabe bearbeiten', en: 'Work on task' }, icon: IconChecklist, description: { de: 'Das Ergebnis einer Aufgabe festhalten und bei Bedarf direkt eine Folgeaufgabe für einen anderen Fachbereich anlegen.', en: 'Record the result of a task and, if needed, directly create a follow-up task for another department.' } },
+  { path: '/intents/entscheidung-festhalten', label: { de: 'Entscheidung festhalten', en: 'Record decision' }, icon: IconGavel, description: { de: 'Eine Entscheidung zu einem Vorhaben mit Ergebnis, Begründung und finanzieller Auswirkung erfassen und die Phase weiterführen.', en: 'Record a decision on a project with result, justification and financial impact, and continue the phase.' } },
+  { path: '/intents/variante-erfassen', label: { de: 'Angebotsvariante erfassen', en: 'Add offer variant' }, icon: IconCopyPlus, description: { de: 'Eine neue Angebotsvariante zu einem Vorhaben anlegen, etwa bei akzeptierter Teillieferung, mit Mengen, Kosten und Liefertermin.', en: 'Create a new quote variant for a project, e.g. for an accepted partial delivery, with quantities, costs and delivery date.' } },
+  { path: '/intents/variante-vorlegen', label: { de: 'Variante dem Kunden vorlegen', en: 'Present variant to customer' }, icon: IconSend, description: { de: 'Die gewählte Variante als vorgelegt markieren, die übrigen verwerfen und das Vorhaben als abgegeben abschließen.', en: 'Mark the selected variant as submitted, discard the others and close the project as submitted.' } },
   // </custom:intents>
 ];
 
@@ -67,5 +67,5 @@ export const INTENTS_PENDING = false;
  * pulsing "werden erstellt …" in every deployed Phase-1 bundle forever — no
  * code path redeploys Phase 1 without the flag (live 03.09.2026).
  */
-export const INTENTS_PENDING_SINCE: string | null = '2026-11-15T14:51:27+00:00';
+export const INTENTS_PENDING_SINCE: string | null = null;
 export const PENDING_MAX_MINUTES = 30;

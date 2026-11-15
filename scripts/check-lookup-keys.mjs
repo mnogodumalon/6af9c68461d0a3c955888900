@@ -47,6 +47,24 @@ const VALID_KEYS = {
     "ressourcenplanung",
     "vertrieb"
   ],
+  "freigabestatus": [
+    "abgelehnt",
+    "freigegeben",
+    "nicht_noetig",
+    "offen"
+  ],
+  "grundlage_art": [
+    "anforderung",
+    "aufgabe",
+    "beitrag",
+    "variante"
+  ],
+  "inhaltsart": [
+    "anforderung",
+    "bedingung",
+    "beitrag",
+    "sonstiges"
+  ],
   "phase": [
     "abgebrochen",
     "anfragepruefung",
@@ -64,16 +82,32 @@ const VALID_KEYS = {
     "niedrig",
     "normal"
   ],
+  "pruefung_status": [
+    "aktuell",
+    "geprueft",
+    "offen"
+  ],
+  "quellenart": [
+    "gespraech",
+    "intern",
+    "kundenanfrage",
+    "norm",
+    "zeichnung"
+  ],
   "status": [
     "aktiv",
     "entfallen",
     "entwurf",
     "erledigt",
+    "ersetzt",
     "geplant",
+    "gueltig",
     "intern_freigegeben",
+    "ueberholt",
     "verworfen",
     "vorgelegt",
-    "wartet"
+    "wartet",
+    "zu_pruefen"
   ]
 };
 

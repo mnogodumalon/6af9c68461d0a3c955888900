@@ -24,7 +24,7 @@ export const PLAN_SENTENCES: Record<string, string[]> = {
   "aufgabe-bearbeiten": [
     "Legt an: aufgaben",
     "Ändert: aufgaben",
-    "Automatisch: ausloeser (fester Wert „folge“), status (fester Wert „geplant“)"
+    "Automatisch: status (fester Wert „geplant“), ausloeser (fester Wert „folge“)"
   ],
   "entscheidung-festhalten": [
     "Legt an: entscheidungen",
@@ -47,9 +47,17 @@ export const PLAN_SUMMARY = "Du bekommst eine Anwendung für die technische Ange
  *  names ONE record, so it reads the singular (J-6, 03.11.2026: „Auswertungen:
  *  Sommerfest“ for one record); the app label is the list's plural. */
 export const NOUNS: Record<string, { one: string; many: string }> = {
+  "aufgaben": {
+    "one": "Aufgabe",
+    "many": "Aufgaben"
+  },
   "beteiligte": {
     "one": "Beteiligter",
     "many": "Beteiligte"
+  },
+  "entscheidungen": {
+    "one": "Entscheidung",
+    "many": "Entscheidungen"
   },
   "angebotsvorhaben": {
     "one": "Angebotsvorhaben",
@@ -58,14 +66,6 @@ export const NOUNS: Record<string, { one: string; many: string }> = {
   "angebotsvarianten": {
     "one": "Angebotsvariante",
     "many": "Angebotsvarianten"
-  },
-  "aufgaben": {
-    "one": "Aufgabe",
-    "many": "Aufgaben"
-  },
-  "entscheidungen": {
-    "one": "Entscheidung",
-    "many": "Entscheidungen"
   }
 };
 
@@ -112,11 +112,6 @@ export interface FlowOwner { slug: string; value?: string }
  *  (check-dashboard gate 25). */
 export const FLOW_OWNED: Record<string, Record<string, FlowOwner[]>> = {
   "aufgaben": {
-    "ergebnis": [
-      {
-        "slug": "aufgabe-bearbeiten"
-      }
-    ],
     "status": [
       {
         "slug": "aufgabe-bearbeiten"
@@ -128,6 +123,11 @@ export const FLOW_OWNED: Record<string, Record<string, FlowOwner[]>> = {
       {
         "slug": "aufgabe-bearbeiten",
         "value": "wartet"
+      }
+    ],
+    "ergebnis": [
+      {
+        "slug": "aufgabe-bearbeiten"
       }
     ],
     "folgeaufgabe_noetig": [

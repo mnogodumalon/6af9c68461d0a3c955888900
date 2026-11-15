@@ -51,6 +51,53 @@ export interface Beteiligte {
   };
 }
 
+export interface Anforderungen {
+  record_id: string;
+  /** The API field. */
+  created_at: string;
+  updated_at: string | null;
+  /** Alias of created_at, filled by the read helpers. The API sends
+   *  snake_case only — reading `createdat` off a raw record yields
+   *  undefined, which type-checks and then crashes at runtime. */
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    vorhaben?: RecordUrl; // applookup -> URL zu 'Angebotsvorhaben' Record
+    titel?: string;
+    beschreibung?: string;
+    quellenart?: LookupValue;
+    quellenangabe?: string;
+    version?: number;
+    status?: LookupValue;
+    gueltig_ab?: string; // Format: YYYY-MM-DD oder ISO String
+    vorgaengerversion?: RecordUrl; // applookup -> URL zu 'Anforderungen' Record
+  };
+}
+
+export interface Fachbeitraege {
+  record_id: string;
+  /** The API field. */
+  created_at: string;
+  updated_at: string | null;
+  /** Alias of created_at, filled by the read helpers. The API sends
+   *  snake_case only — reading `createdat` off a raw record yields
+   *  undefined, which type-checks and then crashes at runtime. */
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    vorhaben?: RecordUrl; // applookup -> URL zu 'Angebotsvorhaben' Record
+    aufgabe?: RecordUrl; // applookup -> URL zu 'Aufgaben' Record
+    autor?: RecordUrl; // applookup -> URL zu 'Beteiligte' Record
+    anforderung?: RecordUrl; // applookup -> URL zu 'Anforderungen' Record
+    variante?: RecordUrl; // applookup -> URL zu 'Angebotsvarianten' Record
+    inhalt?: string;
+    bedingungen?: string;
+    gueltig_von?: string; // Format: YYYY-MM-DD oder ISO String
+    gueltig_bis?: string; // Format: YYYY-MM-DD oder ISO String
+    status?: LookupValue;
+  };
+}
+
 export interface Angebotsvorhaben {
   record_id: string;
   /** The API field. */
@@ -90,6 +137,8 @@ export interface Angebotsvarianten {
   fields: {
     angebotspreis?: number;
     akzeptierte_risiken?: string;
+    vorgaengerversion?: RecordUrl; // applookup -> URL zu 'Angebotsvarianten' Record
+    version?: number;
     vertragsbedingungen?: string;
     status?: LookupValue;
     herstellkosten?: number;
@@ -101,6 +150,31 @@ export interface Angebotsvarianten {
     menge?: number;
     teillieferung?: boolean;
     liefertermin?: string; // Format: YYYY-MM-DD oder ISO String
+  };
+}
+
+export interface Abhaengigkeiten {
+  record_id: string;
+  /** The API field. */
+  created_at: string;
+  updated_at: string | null;
+  /** Alias of created_at, filled by the read helpers. The API sends
+   *  snake_case only — reading `createdat` off a raw record yields
+   *  undefined, which type-checks and then crashes at runtime. */
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    vorhaben?: RecordUrl; // applookup -> URL zu 'Angebotsvorhaben' Record
+    abhaengige_aufgabe?: RecordUrl; // applookup -> URL zu 'Aufgaben' Record
+    grundlage_art?: LookupValue;
+    grundlage_variante?: RecordUrl; // applookup -> URL zu 'Angebotsvarianten' Record
+    grundlage_aufgabe?: RecordUrl; // applookup -> URL zu 'Aufgaben' Record
+    aenderung?: string;
+    pruefung_noetig?: boolean;
+    pruefung_status?: LookupValue;
+    grundlage_anforderung?: RecordUrl; // applookup -> URL zu 'Anforderungen' Record
+    grundlage_beitrag?: RecordUrl; // applookup -> URL zu 'Fachbeitraege' Record
+    geprueft_am?: string; // Format: YYYY-MM-DD oder ISO String
   };
 }
 
@@ -130,6 +204,30 @@ export interface Aufgaben {
   };
 }
 
+export interface Angebotsuebernahmen {
+  record_id: string;
+  /** The API field. */
+  created_at: string;
+  updated_at: string | null;
+  /** Alias of created_at, filled by the read helpers. The API sends
+   *  snake_case only — reading `createdat` off a raw record yields
+   *  undefined, which type-checks and then crashes at runtime. */
+  createdat: string;
+  updatedat: string | null;
+  fields: {
+    anforderung?: RecordUrl; // applookup -> URL zu 'Anforderungen' Record
+    beitrag?: RecordUrl; // applookup -> URL zu 'Fachbeitraege' Record
+    vorhaben?: RecordUrl; // applookup -> URL zu 'Angebotsvorhaben' Record
+    variante?: RecordUrl; // applookup -> URL zu 'Angebotsvarianten' Record
+    entscheidung?: RecordUrl; // applookup -> URL zu 'Entscheidungen' Record
+    inhaltsart?: LookupValue;
+    angebotstext?: string;
+    uebernommen_von?: RecordUrl; // applookup -> URL zu 'Beteiligte' Record
+    uebernahmedatum?: string; // Format: YYYY-MM-DD oder ISO String
+    bemerkung?: string;
+  };
+}
+
 export interface Entscheidungen {
   record_id: string;
   /** The API field. */
@@ -141,6 +239,10 @@ export interface Entscheidungen {
   createdat: string;
   updatedat: string | null;
   fields: {
+    variante?: RecordUrl; // applookup -> URL zu 'Angebotsvarianten' Record
+    freigabestatus?: LookupValue;
+    freigeber?: RecordUrl; // applookup -> URL zu 'Beteiligte' Record
+    freigabedatum?: string; // Format: YYYY-MM-DD oder ISO String
     vorhaben?: RecordUrl; // applookup -> URL zu 'Angebotsvorhaben' Record
     frage?: string;
     ergebnis?: LookupValue;
@@ -156,9 +258,13 @@ export interface Entscheidungen {
 
 export const APP_IDS = {
   BETEILIGTE: '6af9c65deb7e80ebf1c9e8dd',
+  ANFORDERUNGEN: '6af9c88d14e1a81ff0b2dbac',
+  FACHBEITRAEGE: '6af9c88e7dd46f00185bb8ba',
   ANGEBOTSVORHABEN: '6af9c6623da9deca30ddb71c',
   ANGEBOTSVARIANTEN: '6af9c663254ee009281b58ce',
+  ABHAENGIGKEITEN: '6af9c88f1773adde5fbc8416',
   AUFGABEN: '6af9c66423d64594313d3ada',
+  ANGEBOTSUEBERNAHMEN: '6af9c890bdf64a70739958dc',
   ENTSCHEIDUNGEN: '6af9c6643d66392ac76e9866',
 } as const;
 
@@ -167,6 +273,13 @@ export const LOOKUP_OPTIONS: Record<string, Record<string, {key: string, label: 
   'beteiligte': {
     fachbereich: [{ key: "vertrieb", get label() { return lookupLabel('beteiligte', 'fachbereich', "vertrieb") ?? "Vertrieb"; } }, { key: "konstruktion", get label() { return lookupLabel('beteiligte', 'fachbereich', "konstruktion") ?? "Konstruktion"; } }, { key: "einkauf", get label() { return lookupLabel('beteiligte', 'fachbereich', "einkauf") ?? "Einkauf"; } }, { key: "fertigung", get label() { return lookupLabel('beteiligte', 'fachbereich', "fertigung") ?? "Fertigung"; } }, { key: "ressourcenplanung", get label() { return lookupLabel('beteiligte', 'fachbereich', "ressourcenplanung") ?? "Ressourcenplanung"; } }, { key: "qualitaet", get label() { return lookupLabel('beteiligte', 'fachbereich', "qualitaet") ?? "Qualität"; } }, { key: "recht", get label() { return lookupLabel('beteiligte', 'fachbereich', "recht") ?? "Recht"; } }, { key: "geschaeftsleitung", get label() { return lookupLabel('beteiligte', 'fachbereich', "geschaeftsleitung") ?? "Geschäftsleitung"; } }],
   },
+  'anforderungen': {
+    quellenart: [{ key: "kundenanfrage", get label() { return lookupLabel('anforderungen', 'quellenart', "kundenanfrage") ?? "Kundenanfrage"; } }, { key: "zeichnung", get label() { return lookupLabel('anforderungen', 'quellenart', "zeichnung") ?? "Zeichnung"; } }, { key: "norm", get label() { return lookupLabel('anforderungen', 'quellenart', "norm") ?? "Norm oder Vorschrift"; } }, { key: "gespraech", get label() { return lookupLabel('anforderungen', 'quellenart', "gespraech") ?? "Gespräch oder Besprechung"; } }, { key: "intern", get label() { return lookupLabel('anforderungen', 'quellenart', "intern") ?? "Interne Vorgabe"; } }],
+    status: [{ key: "entwurf", get label() { return lookupLabel('anforderungen', 'status', "entwurf") ?? "Entwurf"; } }, { key: "gueltig", get label() { return lookupLabel('anforderungen', 'status', "gueltig") ?? "Gültig"; } }, { key: "ersetzt", get label() { return lookupLabel('anforderungen', 'status', "ersetzt") ?? "Ersetzt"; } }, { key: "entfallen", get label() { return lookupLabel('anforderungen', 'status', "entfallen") ?? "Entfallen"; } }],
+  },
+  'fachbeitraege': {
+    status: [{ key: "entwurf", get label() { return lookupLabel('fachbeitraege', 'status', "entwurf") ?? "Entwurf"; } }, { key: "gueltig", get label() { return lookupLabel('fachbeitraege', 'status', "gueltig") ?? "Gültig"; } }, { key: "zu_pruefen", get label() { return lookupLabel('fachbeitraege', 'status', "zu_pruefen") ?? "Erneut zu prüfen"; } }, { key: "ueberholt", get label() { return lookupLabel('fachbeitraege', 'status', "ueberholt") ?? "Überholt"; } }],
+  },
   'angebotsvorhaben': {
     phase: [{ key: "anfragepruefung", get label() { return lookupLabel('angebotsvorhaben', 'phase', "anfragepruefung") ?? "Anfrageprüfung"; } }, { key: "klaerung_lieferumfang", get label() { return lookupLabel('angebotsvorhaben', 'phase', "klaerung_lieferumfang") ?? "Klärung Lieferumfang"; } }, { key: "machbarkeit", get label() { return lookupLabel('angebotsvorhaben', 'phase', "machbarkeit") ?? "Machbarkeit"; } }, { key: "beschaffung", get label() { return lookupLabel('angebotsvorhaben', 'phase', "beschaffung") ?? "Beschaffung"; } }, { key: "ressourcen", get label() { return lookupLabel('angebotsvorhaben', 'phase', "ressourcen") ?? "Ressourcen"; } }, { key: "kalkulation", get label() { return lookupLabel('angebotsvorhaben', 'phase', "kalkulation") ?? "Kalkulation"; } }, { key: "risikobewertung", get label() { return lookupLabel('angebotsvorhaben', 'phase', "risikobewertung") ?? "Risikobewertung"; } }, { key: "variantenentscheidung", get label() { return lookupLabel('angebotsvorhaben', 'phase', "variantenentscheidung") ?? "Variantenentscheidung"; } }, { key: "angebot_abgegeben", get label() { return lookupLabel('angebotsvorhaben', 'phase', "angebot_abgegeben") ?? "Angebot abgegeben"; } }, { key: "abgebrochen", get label() { return lookupLabel('angebotsvorhaben', 'phase', "abgebrochen") ?? "Abgebrochen"; } }],
     prioritaet: [{ key: "niedrig", get label() { return lookupLabel('angebotsvorhaben', 'prioritaet', "niedrig") ?? "Niedrig"; } }, { key: "normal", get label() { return lookupLabel('angebotsvorhaben', 'prioritaet', "normal") ?? "Normal"; } }, { key: "hoch", get label() { return lookupLabel('angebotsvorhaben', 'prioritaet', "hoch") ?? "Hoch"; } }],
@@ -174,12 +287,20 @@ export const LOOKUP_OPTIONS: Record<string, Record<string, {key: string, label: 
   'angebotsvarianten': {
     status: [{ key: "entwurf", get label() { return lookupLabel('angebotsvarianten', 'status', "entwurf") ?? "Entwurf"; } }, { key: "intern_freigegeben", get label() { return lookupLabel('angebotsvarianten', 'status', "intern_freigegeben") ?? "Intern freigegeben"; } }, { key: "vorgelegt", get label() { return lookupLabel('angebotsvarianten', 'status', "vorgelegt") ?? "Dem Kunden vorgelegt"; } }, { key: "verworfen", get label() { return lookupLabel('angebotsvarianten', 'status', "verworfen") ?? "Verworfen"; } }],
   },
+  'abhaengigkeiten': {
+    grundlage_art: [{ key: "anforderung", get label() { return lookupLabel('abhaengigkeiten', 'grundlage_art', "anforderung") ?? "Anforderung"; } }, { key: "beitrag", get label() { return lookupLabel('abhaengigkeiten', 'grundlage_art', "beitrag") ?? "Fachbeitrag"; } }, { key: "variante", get label() { return lookupLabel('abhaengigkeiten', 'grundlage_art', "variante") ?? "Angebotsvariante"; } }, { key: "aufgabe", get label() { return lookupLabel('abhaengigkeiten', 'grundlage_art', "aufgabe") ?? "Andere Aufgabe"; } }],
+    pruefung_status: [{ key: "aktuell", get label() { return lookupLabel('abhaengigkeiten', 'pruefung_status', "aktuell") ?? "Aktuell, keine Prüfung nötig"; } }, { key: "offen", get label() { return lookupLabel('abhaengigkeiten', 'pruefung_status', "offen") ?? "Prüfung offen"; } }, { key: "geprueft", get label() { return lookupLabel('abhaengigkeiten', 'pruefung_status', "geprueft") ?? "Erneut geprüft"; } }],
+  },
   'aufgaben': {
     art: [{ key: "pruefentscheidung", get label() { return lookupLabel('aufgaben', 'art', "pruefentscheidung") ?? "Prüfentscheidung"; } }, { key: "lieferumfang", get label() { return lookupLabel('aufgaben', 'art', "lieferumfang") ?? "Lieferumfang"; } }, { key: "machbarkeit", get label() { return lookupLabel('aufgaben', 'art', "machbarkeit") ?? "Technische Machbarkeit"; } }, { key: "herstellung_beschaffung", get label() { return lookupLabel('aufgaben', 'art', "herstellung_beschaffung") ?? "Herstellung oder Beschaffung"; } }, { key: "ressourcen", get label() { return lookupLabel('aufgaben', 'art', "ressourcen") ?? "Ressourcenverfügbarkeit"; } }, { key: "kosten", get label() { return lookupLabel('aufgaben', 'art', "kosten") ?? "Mengen, Aufwand und Kosten"; } }, { key: "risiken", get label() { return lookupLabel('aufgaben', 'art', "risiken") ?? "Risiken und Verpflichtungen"; } }, { key: "variantenwahl", get label() { return lookupLabel('aufgaben', 'art', "variantenwahl") ?? "Variantenwahl"; } }, { key: "sonstiges", get label() { return lookupLabel('aufgaben', 'art', "sonstiges") ?? "Sonstiges"; } }],
     status: [{ key: "geplant", get label() { return lookupLabel('aufgaben', 'status', "geplant") ?? "Geplant"; } }, { key: "aktiv", get label() { return lookupLabel('aufgaben', 'status', "aktiv") ?? "Aktiv"; } }, { key: "wartet", get label() { return lookupLabel('aufgaben', 'status', "wartet") ?? "Wartet auf Antwort"; } }, { key: "erledigt", get label() { return lookupLabel('aufgaben', 'status', "erledigt") ?? "Erledigt"; } }, { key: "entfallen", get label() { return lookupLabel('aufgaben', 'status', "entfallen") ?? "Entfallen"; } }],
     ausloeser: [{ key: "vorgabe", get label() { return lookupLabel('aufgaben', 'ausloeser', "vorgabe") ?? "Vorgabe"; } }, { key: "folge", get label() { return lookupLabel('aufgaben', 'ausloeser', "folge") ?? "Ergebnis einer anderen Aufgabe"; } }, { key: "spontan", get label() { return lookupLabel('aufgaben', 'ausloeser', "spontan") ?? "Spontan ergänzt"; } }],
   },
+  'angebotsuebernahmen': {
+    inhaltsart: [{ key: "anforderung", get label() { return lookupLabel('angebotsuebernahmen', 'inhaltsart', "anforderung") ?? "Anforderung"; } }, { key: "beitrag", get label() { return lookupLabel('angebotsuebernahmen', 'inhaltsart', "beitrag") ?? "Fachbeitrag"; } }, { key: "bedingung", get label() { return lookupLabel('angebotsuebernahmen', 'inhaltsart', "bedingung") ?? "Bedingung"; } }, { key: "sonstiges", get label() { return lookupLabel('angebotsuebernahmen', 'inhaltsart', "sonstiges") ?? "Sonstiges"; } }],
+  },
   'entscheidungen': {
+    freigabestatus: [{ key: "nicht_noetig", get label() { return lookupLabel('entscheidungen', 'freigabestatus', "nicht_noetig") ?? "Keine Freigabe nötig"; } }, { key: "offen", get label() { return lookupLabel('entscheidungen', 'freigabestatus', "offen") ?? "Freigabe offen"; } }, { key: "freigegeben", get label() { return lookupLabel('entscheidungen', 'freigabestatus', "freigegeben") ?? "Freigegeben"; } }, { key: "abgelehnt", get label() { return lookupLabel('entscheidungen', 'freigabestatus', "abgelehnt") ?? "Abgelehnt"; } }],
     ergebnis: [{ key: "ja", get label() { return lookupLabel('entscheidungen', 'ergebnis', "ja") ?? "Ja"; } }, { key: "nein", get label() { return lookupLabel('entscheidungen', 'ergebnis', "nein") ?? "Nein"; } }, { key: "bedingt", get label() { return lookupLabel('entscheidungen', 'ergebnis', "bedingt") ?? "Bedingt"; } }, { key: "vertagt", get label() { return lookupLabel('entscheidungen', 'ergebnis', "vertagt") ?? "Vertagt"; } }],
   },
 };
@@ -203,6 +324,29 @@ export const FIELD_TYPES: Record<string, Record<string, string>> = {
     'fachbereich': 'lookup/select',
     'aktiv': 'bool',
   },
+  'anforderungen': {
+    'vorhaben': 'applookup/select',
+    'titel': 'string/text',
+    'beschreibung': 'string/textarea',
+    'quellenart': 'lookup/select',
+    'quellenangabe': 'string/text',
+    'version': 'number',
+    'status': 'lookup/select',
+    'gueltig_ab': 'date/date',
+    'vorgaengerversion': 'applookup/select',
+  },
+  'fachbeitraege': {
+    'vorhaben': 'applookup/select',
+    'aufgabe': 'applookup/select',
+    'autor': 'applookup/select',
+    'anforderung': 'applookup/select',
+    'variante': 'applookup/select',
+    'inhalt': 'string/textarea',
+    'bedingungen': 'string/textarea',
+    'gueltig_von': 'date/date',
+    'gueltig_bis': 'date/date',
+    'status': 'lookup/select',
+  },
   'angebotsvorhaben': {
     'bezeichnung': 'string/text',
     'kundenname': 'string/text',
@@ -220,6 +364,8 @@ export const FIELD_TYPES: Record<string, Record<string, string>> = {
   'angebotsvarianten': {
     'angebotspreis': 'number',
     'akzeptierte_risiken': 'string/textarea',
+    'vorgaengerversion': 'applookup/select',
+    'version': 'number',
     'vertragsbedingungen': 'string/textarea',
     'status': 'lookup/select',
     'herstellkosten': 'number',
@@ -231,6 +377,19 @@ export const FIELD_TYPES: Record<string, Record<string, string>> = {
     'menge': 'number',
     'teillieferung': 'bool',
     'liefertermin': 'date/date',
+  },
+  'abhaengigkeiten': {
+    'vorhaben': 'applookup/select',
+    'abhaengige_aufgabe': 'applookup/select',
+    'grundlage_art': 'lookup/radio',
+    'grundlage_variante': 'applookup/select',
+    'grundlage_aufgabe': 'applookup/select',
+    'aenderung': 'string/textarea',
+    'pruefung_noetig': 'bool',
+    'pruefung_status': 'lookup/select',
+    'grundlage_anforderung': 'applookup/select',
+    'grundlage_beitrag': 'applookup/select',
+    'geprueft_am': 'date/date',
   },
   'aufgaben': {
     'titel': 'string/text',
@@ -246,7 +405,23 @@ export const FIELD_TYPES: Record<string, Record<string, string>> = {
     'folgeaufgabe_hinweis': 'string/textarea',
     'ausloesende_aufgabe': 'applookup/select',
   },
+  'angebotsuebernahmen': {
+    'anforderung': 'applookup/select',
+    'beitrag': 'applookup/select',
+    'vorhaben': 'applookup/select',
+    'variante': 'applookup/select',
+    'entscheidung': 'applookup/select',
+    'inhaltsart': 'lookup/select',
+    'angebotstext': 'string/textarea',
+    'uebernommen_von': 'applookup/select',
+    'uebernahmedatum': 'date/date',
+    'bemerkung': 'string/textarea',
+  },
   'entscheidungen': {
+    'variante': 'applookup/select',
+    'freigabestatus': 'lookup/select',
+    'freigeber': 'applookup/select',
+    'freigabedatum': 'date/date',
     'vorhaben': 'applookup/select',
     'frage': 'string/text',
     'ergebnis': 'lookup/radio',
@@ -262,14 +437,38 @@ export const FIELD_TYPES: Record<string, Record<string, string>> = {
 
 export const HUB_TOPOLOGY: Record<string, { field: string; entity: string }[]> = {
   'beteiligte': [
+    { field: 'autor', entity: 'fachbeitraege' },
     { field: 'projektleitung', entity: 'angebotsvorhaben' },
     { field: 'verantwortlicher', entity: 'aufgaben' },
+    { field: 'uebernommen_von', entity: 'angebotsuebernahmen' },
+    { field: 'freigeber', entity: 'entscheidungen' },
     { field: 'entscheider', entity: 'entscheidungen' },
   ],
+  'anforderungen': [
+    { field: 'anforderung', entity: 'fachbeitraege' },
+    { field: 'grundlage_anforderung', entity: 'abhaengigkeiten' },
+    { field: 'anforderung', entity: 'angebotsuebernahmen' },
+  ],
   'angebotsvorhaben': [
+    { field: 'vorhaben', entity: 'anforderungen' },
+    { field: 'vorhaben', entity: 'fachbeitraege' },
     { field: 'vorhaben', entity: 'angebotsvarianten' },
+    { field: 'vorhaben', entity: 'abhaengigkeiten' },
     { field: 'vorhaben', entity: 'aufgaben' },
+    { field: 'vorhaben', entity: 'angebotsuebernahmen' },
     { field: 'vorhaben', entity: 'entscheidungen' },
+  ],
+  'angebotsvarianten': [
+    { field: 'variante', entity: 'fachbeitraege' },
+    { field: 'grundlage_variante', entity: 'abhaengigkeiten' },
+    { field: 'variante', entity: 'angebotsuebernahmen' },
+    { field: 'variante', entity: 'entscheidungen' },
+  ],
+  'aufgaben': [
+    { field: 'aufgabe', entity: 'fachbeitraege' },
+    { field: 'abhaengige_aufgabe', entity: 'abhaengigkeiten' },
+    { field: 'grundlage_aufgabe', entity: 'abhaengigkeiten' },
+    { field: 'aufgabe', entity: 'entscheidungen' },
   ],
 };
 
@@ -281,7 +480,11 @@ type StripLookup<T> = {
 
 // Helper Types for creating new records (lookup fields as plain strings for API)
 export type CreateBeteiligte = StripLookup<Beteiligte['fields']>;
+export type CreateAnforderungen = StripLookup<Anforderungen['fields']>;
+export type CreateFachbeitraege = StripLookup<Fachbeitraege['fields']>;
 export type CreateAngebotsvorhaben = StripLookup<Angebotsvorhaben['fields']>;
 export type CreateAngebotsvarianten = StripLookup<Angebotsvarianten['fields']>;
+export type CreateAbhaengigkeiten = StripLookup<Abhaengigkeiten['fields']>;
 export type CreateAufgaben = StripLookup<Aufgaben['fields']>;
+export type CreateAngebotsuebernahmen = StripLookup<Angebotsuebernahmen['fields']>;
 export type CreateEntscheidungen = StripLookup<Entscheidungen['fields']>;

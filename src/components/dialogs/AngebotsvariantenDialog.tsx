@@ -3,6 +3,7 @@
  *
  * Props: open, onClose, onSubmit(fields) => Promise<void>, defaultValues?,
  * recordId? (pass when EDITING — enables the attachments section),
+ * angebotsvariantenList (full hook array — resolves the Angebotsvarianten applookup),
  * angebotsvorhabenList (full hook array — resolves the Angebotsvorhaben applookup),
  * enablePhotoScan?, enablePhotoLocation?.
  *
@@ -55,6 +56,7 @@ interface AngebotsvariantenDialogProps {
   defaultValues?: AngebotsvariantenDialogDefaults;
   /** Record id when editing — enables the attachments section. Omit on create. */
   recordId?: string;
+  angebotsvariantenList: Angebotsvarianten[];
   angebotsvorhabenList: Angebotsvorhaben[];
   enablePhotoScan?: boolean;
   enablePhotoLocation?: boolean;
@@ -67,6 +69,7 @@ const NORMALIZE_LOOKUPS: Record<string, readonly { key: string; label: string }[
   status: LOOKUP_OPTIONS['angebotsvarianten']?.['status'] ?? [],
 };
 const NORMALIZE_APPLOOKUPS: Record<string, string> = {
+  vorgaengerversion: APP_IDS.ANGEBOTSVARIANTEN,
   vorhaben: APP_IDS.ANGEBOTSVORHABEN,
 };
 function normalizeDefaults(values: Record<string, unknown>): Record<string, unknown> {
@@ -84,7 +87,7 @@ function normalizeDefaults(values: Record<string, unknown>): Record<string, unkn
   return out;
 }
 
-export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues, recordId, angebotsvorhabenList, enablePhotoScan = true, enablePhotoLocation = true }: AngebotsvariantenDialogProps) {
+export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues, recordId, angebotsvariantenList, angebotsvorhabenList, enablePhotoScan = true, enablePhotoLocation = true }: AngebotsvariantenDialogProps) {
   const [fields, setFields] = useState<Partial<Angebotsvarianten['fields']>>({});
   const [saving, setSaving] = useState(false);
   const normalizedDefaults = useMemo<Record<string, unknown> | undefined>(
@@ -150,9 +153,10 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
   // operands can resolve to numeric fields on the target record.
   const computedContext = useMemo<ComputedContext>(() => ({
     lookupLists: {
+      'vorgaengerversion': angebotsvariantenList,
       'vorhaben': angebotsvorhabenList,
     },
-  }), [angebotsvorhabenList, ]);
+  }), [angebotsvariantenList, angebotsvorhabenList, ]);
   const computedValues = useMemo<Record<string, number | null>>(() => {
     let out: Record<string, number | null> = {};
     const entries = Object.entries(formEnhancements.computed);
@@ -268,6 +272,7 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
       if (parts.length) {
         contextParts.push(`<photo-metadata>\nThe following metadata was extracted from the photo\'s EXIF data:\n${parts.join('\n')}\n</photo-metadata>`);
       }
+      contextParts.push(`<available-records field="vorgaengerversion" entity="Angebotsvarianten">\n${JSON.stringify(angebotsvariantenList.map(r => ({ record_id: r.record_id, ...r.fields })), null, 2)}\n</available-records>`);
       contextParts.push(`<available-records field="vorhaben" entity="Angebotsvorhaben">\n${JSON.stringify(angebotsvorhabenList.map(r => ({ record_id: r.record_id, ...r.fields })), null, 2)}\n</available-records>`);
       if (usePersonalInfo) {
         try {
@@ -278,7 +283,7 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
         }
       }
       const photoContext = contextParts.length ? contextParts.join('\n') : undefined;
-      const schema = `{\n  "angebotspreis": number | null, // Angebotspreis in Euro\n  "akzeptierte_risiken": string | null, // Akzeptierte Risiken\n  "vertragsbedingungen": string | null, // Vertragsbedingungen\n  "status": LookupValue | null, // Status (select one key: "entwurf" | "intern_freigegeben" | "vorgelegt" | "verworfen") mapping: entwurf=Entwurf, intern_freigegeben=Intern freigegeben, vorgelegt=Dem Kunden vorgelegt, verworfen=Verworfen\n  "herstellkosten": number | null, // Herstellkosten in Euro\n  "beschaffungskosten": number | null, // Beschaffungskosten in Euro\n  "aufwand_stunden": number | null, // Aufwand in Stunden\n  "vorhaben": string | null, // Display name from Angebotsvorhaben (see <available-records>)\n  "variantenbezeichnung": string | null, // Variantenbezeichnung\n  "beschreibung": string | null, // Beschreibung\n  "menge": number | null, // Menge\n  "teillieferung": boolean | null, // Teillieferung\n  "liefertermin": string | null, // YYYY-MM-DD\n}`;
+      const schema = `{\n  "angebotspreis": number | null, // Angebotspreis in Euro\n  "akzeptierte_risiken": string | null, // Akzeptierte Risiken\n  "vorgaengerversion": string | null, // Display name from Angebotsvarianten (see <available-records>)\n  "version": number | null, // Version\n  "vertragsbedingungen": string | null, // Vertragsbedingungen\n  "status": LookupValue | null, // Status (select one key: "entwurf" | "intern_freigegeben" | "vorgelegt" | "verworfen") mapping: entwurf=Entwurf, intern_freigegeben=Intern freigegeben, vorgelegt=Dem Kunden vorgelegt, verworfen=Verworfen\n  "herstellkosten": number | null, // Herstellkosten in Euro\n  "beschaffungskosten": number | null, // Beschaffungskosten in Euro\n  "aufwand_stunden": number | null, // Aufwand in Stunden\n  "vorhaben": string | null, // Display name from Angebotsvorhaben (see <available-records>)\n  "variantenbezeichnung": string | null, // Variantenbezeichnung\n  "beschreibung": string | null, // Beschreibung\n  "menge": number | null, // Menge\n  "teillieferung": boolean | null, // Teillieferung\n  "liefertermin": string | null, // YYYY-MM-DD\n}`;
       const raw = await extractFromInput<Record<string, unknown>>(schema, {
         dataUri: uri,
         userText: aiText.trim() || undefined,
@@ -291,10 +296,15 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
           const n = name.toLowerCase().trim();
           return candidates.some(c => c.toLowerCase().includes(n) || n.includes(c.toLowerCase()));
         }
-        const applookupKeys = new Set<string>(["vorhaben"]);
+        const applookupKeys = new Set<string>(["vorgaengerversion", "vorhaben"]);
         for (const [k, v] of Object.entries(raw)) {
           if (applookupKeys.has(k)) continue;
           if (v != null) merged[k] = v;
+        }
+        const vorgaengerversionName = raw['vorgaengerversion'] as string | null;
+        if (vorgaengerversionName) {
+          const vorgaengerversionMatch = angebotsvariantenList.find(r => matchName(vorgaengerversionName!, [String(r.fields.variantenbezeichnung ?? '')]));
+          if (vorgaengerversionMatch) merged['vorgaengerversion'] = createRecordUrl(APP_IDS.ANGEBOTSVARIANTEN, vorgaengerversionMatch.record_id);
         }
         const vorhabenName = raw['vorhaben'] as string | null;
         if (vorhabenName) {
@@ -360,7 +370,7 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
           inputMode="decimal"
           step="any"
           {...numberInputProps(formEnhancements, 'angebotspreis')}
-          placeholder="z. B. 12500"
+          placeholder=""
           value={fields.angebotspreis !== undefined ? fields.angebotspreis : (computedValues['angebotspreis'] ?? '')}
           onChange={e => setFields(f => ({ ...f, angebotspreis: clampNumberValue(formEnhancements, 'angebotspreis', e.target.value) }))}
         />
@@ -371,10 +381,40 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
         <Label htmlFor="akzeptierte_risiken">{labelFor('akzeptierte_risiken')}</Label>
         <Textarea
           id="akzeptierte_risiken"
-          placeholder="Welche Risiken werden akzeptiert?"
+          placeholder=""
           value={fields.akzeptierte_risiken ?? ''}
           onChange={e => setFields(f => ({ ...f, akzeptierte_risiken: e.target.value }))}
           rows={3}
+        />
+      </div>
+    ),
+    'vorgaengerversion': (
+      <div key="vorgaengerversion" className="space-y-1.5">
+        <Label htmlFor="vorgaengerversion">{labelFor('vorgaengerversion')}</Label>
+        <Combobox
+          id="vorgaengerversion"
+          placeholder=""
+          items={angebotsvariantenList.map(r => ({
+            id: r.record_id,
+            label: displayNameOf('angebotsvarianten', r.fields as Record<string, unknown>) || r.record_id,
+          }))}
+          value={extractRecordId(fields.vorgaengerversion)}
+          onChange={id => setFields(f => ({ ...f, vorgaengerversion: id ? createRecordUrl(APP_IDS.ANGEBOTSVARIANTEN, id) : undefined }))}
+        />
+      </div>
+    ),
+    'version': (
+      <div key="version" className="space-y-1.5">
+        <Label htmlFor="version">{labelFor('version')}</Label>
+        <Input
+          id="version"
+          type="number"
+          inputMode="decimal"
+          step="any"
+          {...numberInputProps(formEnhancements, 'version')}
+          placeholder=""
+          value={fields.version !== undefined ? fields.version : (computedValues['version'] ?? '')}
+          onChange={e => setFields(f => ({ ...f, version: clampNumberValue(formEnhancements, 'version', e.target.value) }))}
         />
       </div>
     ),
@@ -383,7 +423,7 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
         <Label htmlFor="vertragsbedingungen">{labelFor('vertragsbedingungen')}</Label>
         <Textarea
           id="vertragsbedingungen"
-          placeholder="Eine Bedingung pro Zeile"
+          placeholder=""
           value={fields.vertragsbedingungen ?? ''}
           onChange={e => setFields(f => ({ ...f, vertragsbedingungen: e.target.value }))}
           rows={3}
@@ -461,7 +501,7 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
           inputMode="decimal"
           step="any"
           {...numberInputProps(formEnhancements, 'herstellkosten')}
-          placeholder="z. B. 8000"
+          placeholder=""
           value={fields.herstellkosten !== undefined ? fields.herstellkosten : (computedValues['herstellkosten'] ?? '')}
           onChange={e => setFields(f => ({ ...f, herstellkosten: clampNumberValue(formEnhancements, 'herstellkosten', e.target.value) }))}
         />
@@ -476,7 +516,7 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
           inputMode="decimal"
           step="any"
           {...numberInputProps(formEnhancements, 'beschaffungskosten')}
-          placeholder="z. B. 1500"
+          placeholder=""
           value={fields.beschaffungskosten !== undefined ? fields.beschaffungskosten : (computedValues['beschaffungskosten'] ?? '')}
           onChange={e => setFields(f => ({ ...f, beschaffungskosten: clampNumberValue(formEnhancements, 'beschaffungskosten', e.target.value) }))}
         />
@@ -491,7 +531,7 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
           inputMode="decimal"
           step="any"
           {...numberInputProps(formEnhancements, 'aufwand_stunden')}
-          placeholder="z. B. 40"
+          placeholder=""
           value={fields.aufwand_stunden !== undefined ? fields.aufwand_stunden : (computedValues['aufwand_stunden'] ?? '')}
           onChange={e => setFields(f => ({ ...f, aufwand_stunden: clampNumberValue(formEnhancements, 'aufwand_stunden', e.target.value) }))}
         />
@@ -502,7 +542,7 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
         <Label htmlFor="vorhaben">{labelFor('vorhaben')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Combobox
           id="vorhaben"
-          placeholder="Welches Vorhaben?"
+          placeholder=""
           items={angebotsvorhabenListAll.map(r => ({
             id: r.record_id,
             label: displayNameOf('angebotsvorhaben', r.fields as Record<string, unknown>) || r.record_id,
@@ -522,7 +562,7 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
         <Label htmlFor="variantenbezeichnung">{labelFor('variantenbezeichnung')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="variantenbezeichnung"
-          placeholder="z. B. Variante A Standard"
+          placeholder=""
           value={fields.variantenbezeichnung ?? ''}
           onChange={e => setFields(f => ({ ...f, variantenbezeichnung: e.target.value }))}
           required
@@ -537,7 +577,7 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
         <Label htmlFor="beschreibung">{labelFor('beschreibung')}</Label>
         <Textarea
           id="beschreibung"
-          placeholder="Was beinhaltet die Variante?"
+          placeholder=""
           value={fields.beschreibung ?? ''}
           onChange={e => setFields(f => ({ ...f, beschreibung: e.target.value }))}
           rows={3}
@@ -553,7 +593,7 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
           inputMode="decimal"
           step="any"
           {...numberInputProps(formEnhancements, 'menge')}
-          placeholder="z. B. 10"
+          placeholder=""
           value={fields.menge !== undefined ? fields.menge : (computedValues['menge'] ?? '')}
           onChange={e => setFields(f => ({ ...f, menge: clampNumberValue(formEnhancements, 'menge', e.target.value) }))}
         />
@@ -577,7 +617,7 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
         <Label htmlFor="liefertermin">{labelFor('liefertermin')}</Label>
         <DatePicker
           id="liefertermin"
-          placeholder="Wann wird geliefert?"
+          placeholder=""
           mode="date"
           value={fields.liefertermin ?? null}
           onChange={v => setFields(f => ({ ...f, liefertermin: v ?? undefined }))}
@@ -606,13 +646,13 @@ export function AngebotsvariantenDialog({ open, onClose, onSubmit, defaultValues
   //     kein passendes Backend-Feld in orderedFields) erscheinen NICHT als
   //     Input, sondern unten als kompakte 'Berechnungen'-Übersicht oder als
   //     Inline-Hint unter dem letzten beitragenden Input.
-  const FIELD_LABELS: Record<string, string> = {"angebotspreis": "Angebotspreis in Euro", "akzeptierte_risiken": "Akzeptierte Risiken", "vertragsbedingungen": "Vertragsbedingungen", "status": "Status", "herstellkosten": "Herstellkosten in Euro", "beschaffungskosten": "Beschaffungskosten in Euro", "aufwand_stunden": "Aufwand in Stunden", "vorhaben": "Angebotsvorhaben", "variantenbezeichnung": "Variantenbezeichnung", "beschreibung": "Beschreibung", "menge": "Menge", "teillieferung": "Teillieferung", "liefertermin": "Liefertermin"};
+  const FIELD_LABELS: Record<string, string> = {"angebotspreis": "Angebotspreis in Euro", "akzeptierte_risiken": "Akzeptierte Risiken", "vorgaengerversion": "Vorgängerversion", "version": "Version", "vertragsbedingungen": "Vertragsbedingungen", "status": "Status", "herstellkosten": "Herstellkosten in Euro", "beschaffungskosten": "Beschaffungskosten in Euro", "aufwand_stunden": "Aufwand in Stunden", "vorhaben": "Angebotsvorhaben", "variantenbezeichnung": "Variantenbezeichnung", "beschreibung": "Beschreibung", "menge": "Menge", "teillieferung": "Teillieferung", "liefertermin": "Liefertermin"};
   const CURRENCY_KEYS = new Set<string>(["angebotspreis", "herstellkosten", "beschaffungskosten"]);
   // Applookup-Referenz-Labels: pro applookup-Feld in dieser Form (ownKey)
   // eine Map { lookupKey: label } für ALLE Felder des Target-Schemas. Wird
   // beim Render-Walk gefiltert auf die in der computed-Formel tatsächlich
   // referenzierten lookupKeys (siehe applookupRefs unten).
-  const APPLOOKUP_LABELS: Record<string, Record<string, string>> = {"vorhaben": {"bezeichnung": "Vorhabenbezeichnung", "kundenname": "Kunde", "anfragenummer": "Anfragenummer", "eingangsdatum": "Eingangsdatum", "abgabefrist": "Abgabefrist", "anfragebeschreibung": "Kurzbeschreibung der Anfrage", "liefergegenstand": "Liefergegenstand", "phase": "Phase", "prioritaet": "Priorität", "auftragsvolumen": "Geschätztes Auftragsvolumen in Euro", "projektleitung": "Projektleitung", "besonderheiten": "Besonderheiten"}};
+  const APPLOOKUP_LABELS: Record<string, Record<string, string>> = {"vorgaengerversion": {"angebotspreis": "Angebotspreis in Euro", "akzeptierte_risiken": "Akzeptierte Risiken", "vorgaengerversion": "Vorgängerversion", "version": "Version", "vertragsbedingungen": "Vertragsbedingungen", "status": "Status", "herstellkosten": "Herstellkosten in Euro", "beschaffungskosten": "Beschaffungskosten in Euro", "aufwand_stunden": "Aufwand in Stunden", "vorhaben": "Angebotsvorhaben", "variantenbezeichnung": "Variantenbezeichnung", "beschreibung": "Beschreibung", "menge": "Menge", "teillieferung": "Teillieferung", "liefertermin": "Liefertermin"}, "vorhaben": {"bezeichnung": "Vorhabenbezeichnung", "kundenname": "Kunde", "anfragenummer": "Anfragenummer", "eingangsdatum": "Eingangsdatum", "abgabefrist": "Abgabefrist", "anfragebeschreibung": "Kurzbeschreibung der Anfrage", "liefergegenstand": "Liefergegenstand", "phase": "Phase", "prioritaet": "Priorität", "auftragsvolumen": "Geschätztes Auftragsvolumen in Euro", "projektleitung": "Projektleitung", "besonderheiten": "Besonderheiten"}};
   const inputFields = useMemo(() => flattenFieldOrder(orderedFields), [orderedFieldsKey]);
   const backendFieldSet = useMemo(() => new Set(inputFields), [inputFields.join(',')]);
   const virtualComputed = useMemo(

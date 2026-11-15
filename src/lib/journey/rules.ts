@@ -14,15 +14,19 @@ import { formatDate, formatDateTime } from '@/lib/formatters';
 import { policyLabel } from './policy';
 import { LOOKUP_OPTIONS } from '@/types/app';
 
-export type EntityKey = 'beteiligte' | 'angebotsvorhaben' | 'angebotsvarianten' | 'aufgaben' | 'entscheidungen';
+export type EntityKey = 'beteiligte' | 'anforderungen' | 'fachbeitraege' | 'angebotsvorhaben' | 'angebotsvarianten' | 'abhaengigkeiten' | 'aufgaben' | 'angebotsuebernahmen' | 'entscheidungen';
 
 /** The text fields of each entity — what a search may run over (generated;
  *  `never` for an entity without text of its own, e.g. a link table). */
 export interface StringFields {
   "beteiligte": "vorname" | "nachname" | "email" | "rolle" | "telefon";
+  "anforderungen": "titel" | "beschreibung" | "quellenangabe";
+  "fachbeitraege": "inhalt" | "bedingungen";
   "angebotsvorhaben": "bezeichnung" | "kundenname" | "anfragenummer" | "anfragebeschreibung" | "liefergegenstand" | "besonderheiten";
   "angebotsvarianten": "akzeptierte_risiken" | "vertragsbedingungen" | "variantenbezeichnung" | "beschreibung";
+  "abhaengigkeiten": "aenderung";
   "aufgaben": "titel" | "fragestellung" | "ergebnis" | "folgeaufgabe_hinweis";
+  "angebotsuebernahmen": "angebotstext" | "bemerkung";
   "entscheidungen": "frage" | "begruendung" | "bedingungen";
 }
 export type StringFieldKey<E extends EntityKey> = E extends keyof StringFields ? StringFields[E] : never;
@@ -32,10 +36,14 @@ export type StringFieldKey<E extends EntityKey> = E extends keyof StringFields ?
  *  (`StepForm.set`), because the review would otherwise show the id. */
 export interface RecordFields {
   "beteiligte": never;
+  "anforderungen": "vorhaben" | "vorgaengerversion";
+  "fachbeitraege": "vorhaben" | "aufgabe" | "autor" | "anforderung" | "variante";
   "angebotsvorhaben": "projektleitung";
-  "angebotsvarianten": "vorhaben";
+  "angebotsvarianten": "vorgaengerversion" | "vorhaben";
+  "abhaengigkeiten": "vorhaben" | "abhaengige_aufgabe" | "grundlage_variante" | "grundlage_aufgabe" | "grundlage_anforderung" | "grundlage_beitrag";
   "aufgaben": "vorhaben" | "verantwortlicher" | "ausloesende_aufgabe";
-  "entscheidungen": "vorhaben" | "entscheider" | "aufgabe";
+  "angebotsuebernahmen": "anforderung" | "beitrag" | "vorhaben" | "variante" | "entscheidung" | "uebernommen_von";
+  "entscheidungen": "variante" | "freigeber" | "vorhaben" | "entscheider" | "aufgabe";
 }
 export type RecordFieldKey<E extends EntityKey> = E extends keyof RecordFields ? RecordFields[E] : never;
 
@@ -107,6 +115,20 @@ export const ENTITIES: Record<EntityKey, EntityInfo> = {
     "pascal": "Beteiligte",
     "single": "BeteiligteEntry"
   },
+  "anforderungen": {
+    "key": "anforderungen",
+    "appId": "6af9c88d14e1a81ff0b2dbac",
+    "label": "Anforderungen",
+    "pascal": "Anforderungen",
+    "single": "AnforderungenEntry"
+  },
+  "fachbeitraege": {
+    "key": "fachbeitraege",
+    "appId": "6af9c88e7dd46f00185bb8ba",
+    "label": "Fachbeiträge",
+    "pascal": "Fachbeitraege",
+    "single": "FachbeitraegeEntry"
+  },
   "angebotsvorhaben": {
     "key": "angebotsvorhaben",
     "appId": "6af9c6623da9deca30ddb71c",
@@ -121,12 +143,26 @@ export const ENTITIES: Record<EntityKey, EntityInfo> = {
     "pascal": "Angebotsvarianten",
     "single": "AngebotsvariantenEntry"
   },
+  "abhaengigkeiten": {
+    "key": "abhaengigkeiten",
+    "appId": "6af9c88f1773adde5fbc8416",
+    "label": "Abhängigkeiten",
+    "pascal": "Abhaengigkeiten",
+    "single": "AbhaengigkeitenEntry"
+  },
   "aufgaben": {
     "key": "aufgaben",
     "appId": "6af9c66423d64594313d3ada",
     "label": "Aufgaben",
     "pascal": "Aufgaben",
     "single": "AufgabenEntry"
+  },
+  "angebotsuebernahmen": {
+    "key": "angebotsuebernahmen",
+    "appId": "6af9c890bdf64a70739958dc",
+    "label": "Angebotsübernahmen",
+    "pascal": "Angebotsuebernahmen",
+    "single": "AngebotsuebernahmenEntry"
   },
   "entscheidungen": {
     "key": "entscheidungen",
@@ -220,6 +256,197 @@ export const FIELD_RULES: Record<EntityKey, Record<string, FieldRule>> = {
       "required": false,
       "label": "Aktiv",
       "writable": true
+    }
+  },
+  "anforderungen": {
+    "vorhaben": {
+      "key": "vorhaben",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": true,
+      "label": "Angebotsvorhaben",
+      "writable": true,
+      "targetAppId": "6af9c6623da9deca30ddb71c",
+      "targetEntity": "angebotsvorhaben"
+    },
+    "titel": {
+      "key": "titel",
+      "fulltype": "string/text",
+      "kind": "text",
+      "required": true,
+      "label": "Titel",
+      "writable": true,
+      "maxLength": 4000
+    },
+    "beschreibung": {
+      "key": "beschreibung",
+      "fulltype": "string/textarea",
+      "kind": "textarea",
+      "required": false,
+      "label": "Beschreibung",
+      "writable": true
+    },
+    "quellenart": {
+      "key": "quellenart",
+      "fulltype": "lookup/select",
+      "kind": "lookup",
+      "required": true,
+      "label": "Art der Quelle",
+      "writable": true,
+      "options": [
+        "kundenanfrage",
+        "zeichnung",
+        "norm",
+        "gespraech",
+        "intern"
+      ]
+    },
+    "quellenangabe": {
+      "key": "quellenangabe",
+      "fulltype": "string/text",
+      "kind": "text",
+      "required": false,
+      "label": "Quellenangabe",
+      "writable": true,
+      "maxLength": 4000
+    },
+    "version": {
+      "key": "version",
+      "fulltype": "number",
+      "kind": "number",
+      "required": true,
+      "label": "Version",
+      "writable": true
+    },
+    "status": {
+      "key": "status",
+      "fulltype": "lookup/select",
+      "kind": "lookup",
+      "required": true,
+      "label": "Status",
+      "writable": true,
+      "options": [
+        "entwurf",
+        "gueltig",
+        "ersetzt",
+        "entfallen"
+      ]
+    },
+    "gueltig_ab": {
+      "key": "gueltig_ab",
+      "fulltype": "date/date",
+      "kind": "date",
+      "required": false,
+      "label": "Gültig ab",
+      "writable": true
+    },
+    "vorgaengerversion": {
+      "key": "vorgaengerversion",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": false,
+      "label": "Vorgängerversion",
+      "writable": true,
+      "targetAppId": "6af9c88d14e1a81ff0b2dbac",
+      "targetEntity": "anforderungen"
+    }
+  },
+  "fachbeitraege": {
+    "vorhaben": {
+      "key": "vorhaben",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": true,
+      "label": "Angebotsvorhaben",
+      "writable": true,
+      "targetAppId": "6af9c6623da9deca30ddb71c",
+      "targetEntity": "angebotsvorhaben"
+    },
+    "aufgabe": {
+      "key": "aufgabe",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": true,
+      "label": "Zugehörige Aufgabe",
+      "writable": true,
+      "targetAppId": "6af9c66423d64594313d3ada",
+      "targetEntity": "aufgaben"
+    },
+    "autor": {
+      "key": "autor",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": true,
+      "label": "Autor",
+      "writable": true,
+      "targetAppId": "6af9c65deb7e80ebf1c9e8dd",
+      "targetEntity": "beteiligte"
+    },
+    "anforderung": {
+      "key": "anforderung",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": false,
+      "label": "Bezogene Anforderung",
+      "writable": true,
+      "targetAppId": "6af9c88d14e1a81ff0b2dbac",
+      "targetEntity": "anforderungen"
+    },
+    "variante": {
+      "key": "variante",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": false,
+      "label": "Bezogene Angebotsvariante",
+      "writable": true,
+      "targetAppId": "6af9c663254ee009281b58ce",
+      "targetEntity": "angebotsvarianten"
+    },
+    "inhalt": {
+      "key": "inhalt",
+      "fulltype": "string/textarea",
+      "kind": "textarea",
+      "required": true,
+      "label": "Inhalt des Beitrags",
+      "writable": true
+    },
+    "bedingungen": {
+      "key": "bedingungen",
+      "fulltype": "string/textarea",
+      "kind": "textarea",
+      "required": false,
+      "label": "Bedingungen",
+      "writable": true
+    },
+    "gueltig_von": {
+      "key": "gueltig_von",
+      "fulltype": "date/date",
+      "kind": "date",
+      "required": false,
+      "label": "Gültig von",
+      "writable": true
+    },
+    "gueltig_bis": {
+      "key": "gueltig_bis",
+      "fulltype": "date/date",
+      "kind": "date",
+      "required": false,
+      "label": "Gültig bis",
+      "writable": true
+    },
+    "status": {
+      "key": "status",
+      "fulltype": "lookup/select",
+      "kind": "lookup",
+      "required": true,
+      "label": "Status",
+      "writable": true,
+      "options": [
+        "entwurf",
+        "gueltig",
+        "zu_pruefen",
+        "ueberholt"
+      ]
     }
   },
   "angebotsvorhaben": {
@@ -361,6 +588,24 @@ export const FIELD_RULES: Record<EntityKey, Record<string, FieldRule>> = {
       "label": "Akzeptierte Risiken",
       "writable": true
     },
+    "vorgaengerversion": {
+      "key": "vorgaengerversion",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": false,
+      "label": "Vorgängerversion",
+      "writable": true,
+      "targetAppId": "6af9c663254ee009281b58ce",
+      "targetEntity": "angebotsvarianten"
+    },
+    "version": {
+      "key": "version",
+      "fulltype": "number",
+      "kind": "number",
+      "required": false,
+      "label": "Version",
+      "writable": true
+    },
     "vertragsbedingungen": {
       "key": "vertragsbedingungen",
       "fulltype": "string/textarea",
@@ -458,6 +703,119 @@ export const FIELD_RULES: Record<EntityKey, Record<string, FieldRule>> = {
       "kind": "date",
       "required": false,
       "label": "Liefertermin",
+      "writable": true
+    }
+  },
+  "abhaengigkeiten": {
+    "vorhaben": {
+      "key": "vorhaben",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": true,
+      "label": "Angebotsvorhaben",
+      "writable": true,
+      "targetAppId": "6af9c6623da9deca30ddb71c",
+      "targetEntity": "angebotsvorhaben"
+    },
+    "abhaengige_aufgabe": {
+      "key": "abhaengige_aufgabe",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": true,
+      "label": "Abhängige Aufgabe",
+      "writable": true,
+      "targetAppId": "6af9c66423d64594313d3ada",
+      "targetEntity": "aufgaben"
+    },
+    "grundlage_art": {
+      "key": "grundlage_art",
+      "fulltype": "lookup/radio",
+      "kind": "lookup",
+      "required": true,
+      "label": "Grundlage ist",
+      "writable": true,
+      "options": [
+        "anforderung",
+        "beitrag",
+        "variante",
+        "aufgabe"
+      ]
+    },
+    "grundlage_variante": {
+      "key": "grundlage_variante",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": false,
+      "label": "Variante als Grundlage",
+      "writable": true,
+      "targetAppId": "6af9c663254ee009281b58ce",
+      "targetEntity": "angebotsvarianten"
+    },
+    "grundlage_aufgabe": {
+      "key": "grundlage_aufgabe",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": false,
+      "label": "Aufgabe als Grundlage",
+      "writable": true,
+      "targetAppId": "6af9c66423d64594313d3ada",
+      "targetEntity": "aufgaben"
+    },
+    "aenderung": {
+      "key": "aenderung",
+      "fulltype": "string/textarea",
+      "kind": "textarea",
+      "required": false,
+      "label": "Änderung an der Grundlage",
+      "writable": true
+    },
+    "pruefung_noetig": {
+      "key": "pruefung_noetig",
+      "fulltype": "bool",
+      "kind": "bool",
+      "required": false,
+      "label": "Erneute Prüfung erforderlich",
+      "writable": true
+    },
+    "pruefung_status": {
+      "key": "pruefung_status",
+      "fulltype": "lookup/select",
+      "kind": "lookup",
+      "required": true,
+      "label": "Stand der Prüfung",
+      "writable": true,
+      "options": [
+        "aktuell",
+        "offen",
+        "geprueft"
+      ]
+    },
+    "grundlage_anforderung": {
+      "key": "grundlage_anforderung",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": false,
+      "label": "Anforderung als Grundlage",
+      "writable": true,
+      "targetAppId": "6af9c88d14e1a81ff0b2dbac",
+      "targetEntity": "anforderungen"
+    },
+    "grundlage_beitrag": {
+      "key": "grundlage_beitrag",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": false,
+      "label": "Fachbeitrag als Grundlage",
+      "writable": true,
+      "targetAppId": "6af9c88e7dd46f00185bb8ba",
+      "targetEntity": "fachbeitraege"
+    },
+    "geprueft_am": {
+      "key": "geprueft_am",
+      "fulltype": "date/date",
+      "kind": "date",
+      "required": false,
+      "label": "Geprüft am",
       "writable": true
     }
   },
@@ -589,7 +947,149 @@ export const FIELD_RULES: Record<EntityKey, Record<string, FieldRule>> = {
       "targetEntity": "aufgaben"
     }
   },
+  "angebotsuebernahmen": {
+    "anforderung": {
+      "key": "anforderung",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": false,
+      "label": "Übernommene Anforderung",
+      "writable": true,
+      "targetAppId": "6af9c88d14e1a81ff0b2dbac",
+      "targetEntity": "anforderungen"
+    },
+    "beitrag": {
+      "key": "beitrag",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": false,
+      "label": "Übernommener Fachbeitrag",
+      "writable": true,
+      "targetAppId": "6af9c88e7dd46f00185bb8ba",
+      "targetEntity": "fachbeitraege"
+    },
+    "vorhaben": {
+      "key": "vorhaben",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": true,
+      "label": "Angebotsvorhaben",
+      "writable": true,
+      "targetAppId": "6af9c6623da9deca30ddb71c",
+      "targetEntity": "angebotsvorhaben"
+    },
+    "variante": {
+      "key": "variante",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": true,
+      "label": "Angebotsvariante",
+      "writable": true,
+      "targetAppId": "6af9c663254ee009281b58ce",
+      "targetEntity": "angebotsvarianten"
+    },
+    "entscheidung": {
+      "key": "entscheidung",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": true,
+      "label": "Freigebende Entscheidung",
+      "writable": true,
+      "targetAppId": "6af9c6643d66392ac76e9866",
+      "targetEntity": "entscheidungen"
+    },
+    "inhaltsart": {
+      "key": "inhaltsart",
+      "fulltype": "lookup/select",
+      "kind": "lookup",
+      "required": true,
+      "label": "Art des Inhalts",
+      "writable": true,
+      "options": [
+        "anforderung",
+        "beitrag",
+        "bedingung",
+        "sonstiges"
+      ]
+    },
+    "angebotstext": {
+      "key": "angebotstext",
+      "fulltype": "string/textarea",
+      "kind": "textarea",
+      "required": true,
+      "label": "Text im Angebot",
+      "writable": true
+    },
+    "uebernommen_von": {
+      "key": "uebernommen_von",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": false,
+      "label": "Übernommen von",
+      "writable": true,
+      "targetAppId": "6af9c65deb7e80ebf1c9e8dd",
+      "targetEntity": "beteiligte"
+    },
+    "uebernahmedatum": {
+      "key": "uebernahmedatum",
+      "fulltype": "date/date",
+      "kind": "date",
+      "required": false,
+      "label": "Übernahmedatum",
+      "writable": true
+    },
+    "bemerkung": {
+      "key": "bemerkung",
+      "fulltype": "string/textarea",
+      "kind": "textarea",
+      "required": false,
+      "label": "Bemerkung",
+      "writable": true
+    }
+  },
   "entscheidungen": {
+    "variante": {
+      "key": "variante",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": false,
+      "label": "Angebotsvariante",
+      "writable": true,
+      "targetAppId": "6af9c663254ee009281b58ce",
+      "targetEntity": "angebotsvarianten"
+    },
+    "freigabestatus": {
+      "key": "freigabestatus",
+      "fulltype": "lookup/select",
+      "kind": "lookup",
+      "required": false,
+      "label": "Freigabestatus",
+      "writable": true,
+      "options": [
+        "nicht_noetig",
+        "offen",
+        "freigegeben",
+        "abgelehnt"
+      ]
+    },
+    "freigeber": {
+      "key": "freigeber",
+      "fulltype": "applookup/select",
+      "kind": "record",
+      "required": false,
+      "label": "Freigebende Person",
+      "writable": true,
+      "targetAppId": "6af9c65deb7e80ebf1c9e8dd",
+      "targetEntity": "beteiligte"
+    },
+    "freigabedatum": {
+      "key": "freigabedatum",
+      "fulltype": "date/date",
+      "kind": "date",
+      "required": false,
+      "label": "Freigabedatum",
+      "writable": true
+    },
     "vorhaben": {
       "key": "vorhaben",
       "fulltype": "applookup/select",
@@ -689,6 +1189,65 @@ export const FIELD_RULES: Record<EntityKey, Record<string, FieldRule>> = {
 
 export const SHAPES: Record<EntityKey, Shape[]> = {
   "beteiligte": [],
+  "anforderungen": [
+    {
+      "kind": "choice",
+      "field": "quellenart",
+      "count": 5
+    },
+    {
+      "kind": "choice",
+      "field": "status",
+      "count": 4
+    },
+    {
+      "kind": "record",
+      "field": "vorhaben",
+      "targetEntity": "angebotsvorhaben"
+    },
+    {
+      "kind": "record",
+      "field": "vorgaengerversion",
+      "targetEntity": "anforderungen"
+    }
+  ],
+  "fachbeitraege": [
+    {
+      "kind": "range",
+      "from": "gueltig_von",
+      "to": "gueltig_bis"
+    },
+    {
+      "kind": "choice",
+      "field": "status",
+      "count": 4
+    },
+    {
+      "kind": "record",
+      "field": "vorhaben",
+      "targetEntity": "angebotsvorhaben"
+    },
+    {
+      "kind": "record",
+      "field": "aufgabe",
+      "targetEntity": "aufgaben"
+    },
+    {
+      "kind": "record",
+      "field": "autor",
+      "targetEntity": "beteiligte"
+    },
+    {
+      "kind": "record",
+      "field": "anforderung",
+      "targetEntity": "anforderungen"
+    },
+    {
+      "kind": "record",
+      "field": "variante",
+      "targetEntity": "angebotsvarianten"
+    }
+  ],
   "angebotsvorhaben": [
     {
       "kind": "choice",
@@ -709,8 +1268,55 @@ export const SHAPES: Record<EntityKey, Shape[]> = {
     },
     {
       "kind": "record",
+      "field": "vorgaengerversion",
+      "targetEntity": "angebotsvarianten"
+    },
+    {
+      "kind": "record",
       "field": "vorhaben",
       "targetEntity": "angebotsvorhaben"
+    }
+  ],
+  "abhaengigkeiten": [
+    {
+      "kind": "choice",
+      "field": "grundlage_art",
+      "count": 4
+    },
+    {
+      "kind": "choice",
+      "field": "pruefung_status",
+      "count": 3
+    },
+    {
+      "kind": "record",
+      "field": "vorhaben",
+      "targetEntity": "angebotsvorhaben"
+    },
+    {
+      "kind": "record",
+      "field": "abhaengige_aufgabe",
+      "targetEntity": "aufgaben"
+    },
+    {
+      "kind": "record",
+      "field": "grundlage_variante",
+      "targetEntity": "angebotsvarianten"
+    },
+    {
+      "kind": "record",
+      "field": "grundlage_aufgabe",
+      "targetEntity": "aufgaben"
+    },
+    {
+      "kind": "record",
+      "field": "grundlage_anforderung",
+      "targetEntity": "anforderungen"
+    },
+    {
+      "kind": "record",
+      "field": "grundlage_beitrag",
+      "targetEntity": "fachbeitraege"
     }
   ],
   "aufgaben": [
@@ -740,11 +1346,63 @@ export const SHAPES: Record<EntityKey, Shape[]> = {
       "targetEntity": "aufgaben"
     }
   ],
+  "angebotsuebernahmen": [
+    {
+      "kind": "choice",
+      "field": "inhaltsart",
+      "count": 4
+    },
+    {
+      "kind": "record",
+      "field": "anforderung",
+      "targetEntity": "anforderungen"
+    },
+    {
+      "kind": "record",
+      "field": "beitrag",
+      "targetEntity": "fachbeitraege"
+    },
+    {
+      "kind": "record",
+      "field": "vorhaben",
+      "targetEntity": "angebotsvorhaben"
+    },
+    {
+      "kind": "record",
+      "field": "variante",
+      "targetEntity": "angebotsvarianten"
+    },
+    {
+      "kind": "record",
+      "field": "entscheidung",
+      "targetEntity": "entscheidungen"
+    },
+    {
+      "kind": "record",
+      "field": "uebernommen_von",
+      "targetEntity": "beteiligte"
+    }
+  ],
   "entscheidungen": [
+    {
+      "kind": "choice",
+      "field": "freigabestatus",
+      "count": 4
+    },
     {
       "kind": "choice",
       "field": "ergebnis",
       "count": 4
+    },
+    {
+      "kind": "record",
+      "field": "variante",
+      "targetEntity": "angebotsvarianten"
+    },
+    {
+      "kind": "record",
+      "field": "freigeber",
+      "targetEntity": "beteiligte"
     },
     {
       "kind": "record",
@@ -773,14 +1431,26 @@ export const DISPLAY_FIELDS: Record<EntityKey, string[]> = {
     "vorname",
     "nachname"
   ],
+  "anforderungen": [
+    "titel"
+  ],
+  "fachbeitraege": [
+    "inhalt"
+  ],
   "angebotsvorhaben": [
     "bezeichnung"
   ],
   "angebotsvarianten": [
     "variantenbezeichnung"
   ],
+  "abhaengigkeiten": [
+    "aenderung"
+  ],
   "aufgaben": [
     "titel"
+  ],
+  "angebotsuebernahmen": [
+    "angebotstext"
   ],
   "entscheidungen": [
     "frage"

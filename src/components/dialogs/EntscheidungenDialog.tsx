@@ -3,8 +3,9 @@
  *
  * Props: open, onClose, onSubmit(fields) => Promise<void>, defaultValues?,
  * recordId? (pass when EDITING — enables the attachments section),
- * angebotsvorhabenList (full hook array — resolves the Angebotsvorhaben applookup),
+ * angebotsvariantenList (full hook array — resolves the Angebotsvarianten applookup),
  * beteiligteList (full hook array — resolves the Beteiligte applookup),
+ * angebotsvorhabenList (full hook array — resolves the Angebotsvorhaben applookup),
  * aufgabenList (full hook array — resolves the Aufgaben applookup),
  * enablePhotoScan?, enablePhotoLocation?.
  *
@@ -16,7 +17,7 @@
  *  ✓ useState<EntscheidungenDialogDefaults | undefined>(undefined)
  */
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import type { Entscheidungen, Angebotsvorhaben, Beteiligte, Aufgaben, LookupValue } from '@/types/app';
+import type { Entscheidungen, Angebotsvarianten, Beteiligte, Angebotsvorhaben, Aufgaben, LookupValue } from '@/types/app';
 import { APP_IDS, LOOKUP_OPTIONS } from '@/types/app';
 import { extractRecordId, createRecordUrl, cleanFieldsForApi, getUserProfile, LivingAppsService } from '@/services/livingAppsService';
 import {
@@ -35,8 +36,9 @@ import { displayNameOf } from '@/lib/journey/rules';
 import { t, appLabel, fieldLabel, lookupLabel, localeTag, CURRENCY } from '@/i18n';
 import { Textarea } from '@/components/ui/textarea';
 import { Combobox } from '@/components/Combobox';
-import { AngebotsvorhabenDialog } from '@/components/dialogs/AngebotsvorhabenDialog';
+import { AngebotsvariantenDialog } from '@/components/dialogs/AngebotsvariantenDialog';
 import { BeteiligteDialog } from '@/components/dialogs/BeteiligteDialog';
+import { AngebotsvorhabenDialog } from '@/components/dialogs/AngebotsvorhabenDialog';
 import { AufgabenDialog } from '@/components/dialogs/AufgabenDialog';
 import { DatePicker } from '@/components/DatePicker';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -45,7 +47,8 @@ import { fileToDataUri, extractFromInput, extractPhotoMeta, reverseGeocode } fro
 import { lookupKey } from '@/lib/formatters';
 
 /** Widened prefill type for EntscheidungenDialog.defaultValues — see file header. */
-export type EntscheidungenDialogDefaults = Omit<Entscheidungen['fields'], 'ergebnis'> & {
+export type EntscheidungenDialogDefaults = Omit<Entscheidungen['fields'], 'freigabestatus' | 'ergebnis'> & {
+    freigabestatus?: LookupValue | string;
     ergebnis?: LookupValue | string;
   };
 
@@ -59,8 +62,9 @@ interface EntscheidungenDialogProps {
   defaultValues?: EntscheidungenDialogDefaults;
   /** Record id when editing — enables the attachments section. Omit on create. */
   recordId?: string;
-  angebotsvorhabenList: Angebotsvorhaben[];
+  angebotsvariantenList: Angebotsvarianten[];
   beteiligteList: Beteiligte[];
+  angebotsvorhabenList: Angebotsvorhaben[];
   aufgabenList: Aufgaben[];
   enablePhotoScan?: boolean;
   enablePhotoLocation?: boolean;
@@ -70,9 +74,12 @@ interface EntscheidungenDialogProps {
 // its own options and bare record ids via the field's target app — consumers
 // never carry the LookupValue/record-URL shape in their head.
 const NORMALIZE_LOOKUPS: Record<string, readonly { key: string; label: string }[]> = {
+  freigabestatus: LOOKUP_OPTIONS['entscheidungen']?.['freigabestatus'] ?? [],
   ergebnis: LOOKUP_OPTIONS['entscheidungen']?.['ergebnis'] ?? [],
 };
 const NORMALIZE_APPLOOKUPS: Record<string, string> = {
+  variante: APP_IDS.ANGEBOTSVARIANTEN,
+  freigeber: APP_IDS.BETEILIGTE,
   vorhaben: APP_IDS.ANGEBOTSVORHABEN,
   entscheider: APP_IDS.BETEILIGTE,
   aufgabe: APP_IDS.AUFGABEN,
@@ -92,7 +99,7 @@ function normalizeDefaults(values: Record<string, unknown>): Record<string, unkn
   return out;
 }
 
-export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, recordId, angebotsvorhabenList, beteiligteList, aufgabenList, enablePhotoScan = true, enablePhotoLocation = true }: EntscheidungenDialogProps) {
+export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, recordId, angebotsvariantenList, beteiligteList, angebotsvorhabenList, aufgabenList, enablePhotoScan = true, enablePhotoLocation = true }: EntscheidungenDialogProps) {
   const [fields, setFields] = useState<Partial<Entscheidungen['fields']>>({});
   const [saving, setSaving] = useState(false);
   const normalizedDefaults = useMemo<Record<string, unknown> | undefined>(
@@ -110,22 +117,22 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
       return true;
     }
   }, [fields, normalizedDefaults]);
-  // Inline-Create state for "Angebotsvorhaben" target. The dropdown's
+  // Inline-Create state for "Angebotsvarianten" target. The dropdown's
   // "+ Neuer …" option opens a sub-dialog; on submit we POST, add the new
-  // record to the local `extraAngebotsvorhaben` list, and select it in
-  // the originating Combobox via the captured `createAngebotsvorhabenField`.
-  const [createAngebotsvorhabenOpen, setCreateAngebotsvorhabenOpen] = useState(false);
-  const [createAngebotsvorhabenInitial, setCreateAngebotsvorhabenInitial] = useState('');
-  const [createAngebotsvorhabenField, setCreateAngebotsvorhabenField] = useState<string>('');
-  const [extraAngebotsvorhaben, setExtraAngebotsvorhaben] = useState< Angebotsvorhaben[]>([]);
-  const angebotsvorhabenListAll = useMemo(
-    () => [...angebotsvorhabenList, ...extraAngebotsvorhaben],
-    [angebotsvorhabenList, extraAngebotsvorhaben],
+  // record to the local `extraAngebotsvarianten` list, and select it in
+  // the originating Combobox via the captured `createAngebotsvariantenField`.
+  const [createAngebotsvariantenOpen, setCreateAngebotsvariantenOpen] = useState(false);
+  const [createAngebotsvariantenInitial, setCreateAngebotsvariantenInitial] = useState('');
+  const [createAngebotsvariantenField, setCreateAngebotsvariantenField] = useState<string>('');
+  const [extraAngebotsvarianten, setExtraAngebotsvarianten] = useState< Angebotsvarianten[]>([]);
+  const angebotsvariantenListAll = useMemo(
+    () => [...angebotsvariantenList, ...extraAngebotsvarianten],
+    [angebotsvariantenList, extraAngebotsvarianten],
   );
-  function openCreateAngebotsvorhaben(fieldKey: string, q: string) {
-    setCreateAngebotsvorhabenField(fieldKey);
-    setCreateAngebotsvorhabenInitial(q);
-    setCreateAngebotsvorhabenOpen(true);
+  function openCreateAngebotsvarianten(fieldKey: string, q: string) {
+    setCreateAngebotsvariantenField(fieldKey);
+    setCreateAngebotsvariantenInitial(q);
+    setCreateAngebotsvariantenOpen(true);
   }
   // Inline-Create state for "Beteiligte" target. The dropdown's
   // "+ Neuer …" option opens a sub-dialog; on submit we POST, add the new
@@ -143,6 +150,23 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
     setCreateBeteiligteField(fieldKey);
     setCreateBeteiligteInitial(q);
     setCreateBeteiligteOpen(true);
+  }
+  // Inline-Create state for "Angebotsvorhaben" target. The dropdown's
+  // "+ Neuer …" option opens a sub-dialog; on submit we POST, add the new
+  // record to the local `extraAngebotsvorhaben` list, and select it in
+  // the originating Combobox via the captured `createAngebotsvorhabenField`.
+  const [createAngebotsvorhabenOpen, setCreateAngebotsvorhabenOpen] = useState(false);
+  const [createAngebotsvorhabenInitial, setCreateAngebotsvorhabenInitial] = useState('');
+  const [createAngebotsvorhabenField, setCreateAngebotsvorhabenField] = useState<string>('');
+  const [extraAngebotsvorhaben, setExtraAngebotsvorhaben] = useState< Angebotsvorhaben[]>([]);
+  const angebotsvorhabenListAll = useMemo(
+    () => [...angebotsvorhabenList, ...extraAngebotsvorhaben],
+    [angebotsvorhabenList, extraAngebotsvorhaben],
+  );
+  function openCreateAngebotsvorhaben(fieldKey: string, q: string) {
+    setCreateAngebotsvorhabenField(fieldKey);
+    setCreateAngebotsvorhabenInitial(q);
+    setCreateAngebotsvorhabenOpen(true);
   }
   // Inline-Create state for "Aufgaben" target. The dropdown's
   // "+ Neuer …" option opens a sub-dialog; on submit we POST, add the new
@@ -192,11 +216,13 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
   // operands can resolve to numeric fields on the target record.
   const computedContext = useMemo<ComputedContext>(() => ({
     lookupLists: {
+      'variante': angebotsvariantenList,
+      'freigeber': beteiligteList,
       'vorhaben': angebotsvorhabenList,
       'entscheider': beteiligteList,
       'aufgabe': aufgabenList,
     },
-  }), [angebotsvorhabenList, beteiligteList, aufgabenList, ]);
+  }), [angebotsvariantenList, beteiligteList, angebotsvorhabenList, beteiligteList, aufgabenList, ]);
   const computedValues = useMemo<Record<string, number | null>>(() => {
     let out: Record<string, number | null> = {};
     const entries = Object.entries(formEnhancements.computed);
@@ -312,6 +338,8 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
       if (parts.length) {
         contextParts.push(`<photo-metadata>\nThe following metadata was extracted from the photo\'s EXIF data:\n${parts.join('\n')}\n</photo-metadata>`);
       }
+      contextParts.push(`<available-records field="variante" entity="Angebotsvarianten">\n${JSON.stringify(angebotsvariantenList.map(r => ({ record_id: r.record_id, ...r.fields })), null, 2)}\n</available-records>`);
+      contextParts.push(`<available-records field="freigeber" entity="Beteiligte">\n${JSON.stringify(beteiligteList.map(r => ({ record_id: r.record_id, ...r.fields })), null, 2)}\n</available-records>`);
       contextParts.push(`<available-records field="vorhaben" entity="Angebotsvorhaben">\n${JSON.stringify(angebotsvorhabenList.map(r => ({ record_id: r.record_id, ...r.fields })), null, 2)}\n</available-records>`);
       contextParts.push(`<available-records field="entscheider" entity="Beteiligte">\n${JSON.stringify(beteiligteList.map(r => ({ record_id: r.record_id, ...r.fields })), null, 2)}\n</available-records>`);
       contextParts.push(`<available-records field="aufgabe" entity="Aufgaben">\n${JSON.stringify(aufgabenList.map(r => ({ record_id: r.record_id, ...r.fields })), null, 2)}\n</available-records>`);
@@ -324,7 +352,7 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
         }
       }
       const photoContext = contextParts.length ? contextParts.join('\n') : undefined;
-      const schema = `{\n  "vorhaben": string | null, // Display name from Angebotsvorhaben (see <available-records>)\n  "frage": string | null, // Entscheidungsfrage\n  "ergebnis": LookupValue | null, // Ergebnis (select one key: "ja" | "nein" | "bedingt" | "vertagt") mapping: ja=Ja, nein=Nein, bedingt=Bedingt, vertagt=Vertagt\n  "begruendung": string | null, // Begründung\n  "bedingungen": string | null, // Bedingungen\n  "finanzielle_auswirkung": number | null, // Finanzielle Auswirkung in Euro\n  "entscheider": string | null, // Display name from Beteiligte (see <available-records>)\n  "entscheidungsdatum": string | null, // YYYY-MM-DD\n  "freigabe_noetig": boolean | null, // Freigabe durch höhere Ebene erforderlich\n  "aufgabe": string | null, // Display name from Aufgaben (see <available-records>)\n}`;
+      const schema = `{\n  "variante": string | null, // Display name from Angebotsvarianten (see <available-records>)\n  "freigabestatus": LookupValue | null, // Freigabestatus (select one key: "nicht_noetig" | "offen" | "freigegeben" | "abgelehnt") mapping: nicht_noetig=Keine Freigabe nötig, offen=Freigabe offen, freigegeben=Freigegeben, abgelehnt=Abgelehnt\n  "freigeber": string | null, // Display name from Beteiligte (see <available-records>)\n  "freigabedatum": string | null, // YYYY-MM-DD\n  "vorhaben": string | null, // Display name from Angebotsvorhaben (see <available-records>)\n  "frage": string | null, // Entscheidungsfrage\n  "ergebnis": LookupValue | null, // Ergebnis (select one key: "ja" | "nein" | "bedingt" | "vertagt") mapping: ja=Ja, nein=Nein, bedingt=Bedingt, vertagt=Vertagt\n  "begruendung": string | null, // Begründung\n  "bedingungen": string | null, // Bedingungen\n  "finanzielle_auswirkung": number | null, // Finanzielle Auswirkung in Euro\n  "entscheider": string | null, // Display name from Beteiligte (see <available-records>)\n  "entscheidungsdatum": string | null, // YYYY-MM-DD\n  "freigabe_noetig": boolean | null, // Freigabe durch höhere Ebene erforderlich\n  "aufgabe": string | null, // Display name from Aufgaben (see <available-records>)\n}`;
       const raw = await extractFromInput<Record<string, unknown>>(schema, {
         dataUri: uri,
         userText: aiText.trim() || undefined,
@@ -337,10 +365,20 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
           const n = name.toLowerCase().trim();
           return candidates.some(c => c.toLowerCase().includes(n) || n.includes(c.toLowerCase()));
         }
-        const applookupKeys = new Set<string>(["vorhaben", "entscheider", "aufgabe"]);
+        const applookupKeys = new Set<string>(["variante", "freigeber", "vorhaben", "entscheider", "aufgabe"]);
         for (const [k, v] of Object.entries(raw)) {
           if (applookupKeys.has(k)) continue;
           if (v != null) merged[k] = v;
+        }
+        const varianteName = raw['variante'] as string | null;
+        if (varianteName) {
+          const varianteMatch = angebotsvariantenList.find(r => matchName(varianteName!, [String(r.fields.variantenbezeichnung ?? '')]));
+          if (varianteMatch) merged['variante'] = createRecordUrl(APP_IDS.ANGEBOTSVARIANTEN, varianteMatch.record_id);
+        }
+        const freigeberName = raw['freigeber'] as string | null;
+        if (freigeberName) {
+          const freigeberMatch = beteiligteList.find(r => matchName(freigeberName!, [[r.fields.vorname ?? '', r.fields.nachname ?? ''].filter(Boolean).join(' ')]));
+          if (freigeberMatch) merged['freigeber'] = createRecordUrl(APP_IDS.BETEILIGTE, freigeberMatch.record_id);
         }
         const vorhabenName = raw['vorhaben'] as string | null;
         if (vorhabenName) {
@@ -407,12 +445,117 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
   const labelFor = (k: string) => dialogLabel(formEnhancements, k, fieldLabel('entscheidungen', k));
 
   const fieldBlocks: Record<string, React.ReactNode> = {
+    'variante': (
+      <div key="variante" className="space-y-1.5">
+        <Label htmlFor="variante">{labelFor('variante')}</Label>
+        <Combobox
+          id="variante"
+          placeholder=""
+          items={angebotsvariantenListAll.map(r => ({
+            id: r.record_id,
+            label: displayNameOf('angebotsvarianten', r.fields as Record<string, unknown>) || r.record_id,
+          }))}
+          value={extractRecordId(fields.variante)}
+          onChange={id => setFields(f => ({ ...f, variante: id ? createRecordUrl(APP_IDS.ANGEBOTSVARIANTEN, id) : undefined }))}
+          onCreateNew={(q) => openCreateAngebotsvarianten("variante", q)}
+          createLabel={t('create_in', { entity: appLabel('angebotsvarianten') })}
+        />
+      </div>
+    ),
+    'freigabestatus': (
+      <div key="freigabestatus" className="space-y-1.5">
+        <Label htmlFor="freigabestatus">{labelFor('freigabestatus')}</Label>
+        <div role="radiogroup" className="flex flex-wrap gap-1.5">
+          <button
+            type="button"
+            role="radio"
+            aria-checked={lookupKey(fields.freigabestatus) === 'nicht_noetig'}
+            onClick={() => setFields(f => ({ ...f, freigabestatus: (lookupKey(f.freigabestatus) === 'nicht_noetig' ? undefined : 'nicht_noetig') as any }))}
+            className={`inline-flex items-center justify-center min-h-9 max-sm:min-h-11 max-sm:px-4 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+              lookupKey(fields.freigabestatus) === 'nicht_noetig'
+                ? 'bg-foreground text-background border-foreground'
+                : 'bg-background text-foreground border-input hover:bg-accent'
+            }`}
+          >
+            {lookupLabel('entscheidungen', 'freigabestatus', 'nicht_noetig') ?? 'Keine Freigabe nötig'}
+          </button>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={lookupKey(fields.freigabestatus) === 'offen'}
+            onClick={() => setFields(f => ({ ...f, freigabestatus: (lookupKey(f.freigabestatus) === 'offen' ? undefined : 'offen') as any }))}
+            className={`inline-flex items-center justify-center min-h-9 max-sm:min-h-11 max-sm:px-4 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+              lookupKey(fields.freigabestatus) === 'offen'
+                ? 'bg-foreground text-background border-foreground'
+                : 'bg-background text-foreground border-input hover:bg-accent'
+            }`}
+          >
+            {lookupLabel('entscheidungen', 'freigabestatus', 'offen') ?? 'Freigabe offen'}
+          </button>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={lookupKey(fields.freigabestatus) === 'freigegeben'}
+            onClick={() => setFields(f => ({ ...f, freigabestatus: (lookupKey(f.freigabestatus) === 'freigegeben' ? undefined : 'freigegeben') as any }))}
+            className={`inline-flex items-center justify-center min-h-9 max-sm:min-h-11 max-sm:px-4 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+              lookupKey(fields.freigabestatus) === 'freigegeben'
+                ? 'bg-foreground text-background border-foreground'
+                : 'bg-background text-foreground border-input hover:bg-accent'
+            }`}
+          >
+            {lookupLabel('entscheidungen', 'freigabestatus', 'freigegeben') ?? 'Freigegeben'}
+          </button>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={lookupKey(fields.freigabestatus) === 'abgelehnt'}
+            onClick={() => setFields(f => ({ ...f, freigabestatus: (lookupKey(f.freigabestatus) === 'abgelehnt' ? undefined : 'abgelehnt') as any }))}
+            className={`inline-flex items-center justify-center min-h-9 max-sm:min-h-11 max-sm:px-4 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+              lookupKey(fields.freigabestatus) === 'abgelehnt'
+                ? 'bg-foreground text-background border-foreground'
+                : 'bg-background text-foreground border-input hover:bg-accent'
+            }`}
+          >
+            {lookupLabel('entscheidungen', 'freigabestatus', 'abgelehnt') ?? 'Abgelehnt'}
+          </button>
+        </div>
+      </div>
+    ),
+    'freigeber': (
+      <div key="freigeber" className="space-y-1.5">
+        <Label htmlFor="freigeber">{labelFor('freigeber')}</Label>
+        <Combobox
+          id="freigeber"
+          placeholder=""
+          items={beteiligteListAll.map(r => ({
+            id: r.record_id,
+            label: displayNameOf('beteiligte', r.fields as Record<string, unknown>) || r.record_id,
+          }))}
+          value={extractRecordId(fields.freigeber)}
+          onChange={id => setFields(f => ({ ...f, freigeber: id ? createRecordUrl(APP_IDS.BETEILIGTE, id) : undefined }))}
+          onCreateNew={(q) => openCreateBeteiligte("freigeber", q)}
+          createLabel={t('create_in', { entity: appLabel('beteiligte') })}
+        />
+      </div>
+    ),
+    'freigabedatum': (
+      <div key="freigabedatum" className="space-y-1.5">
+        <Label htmlFor="freigabedatum">{labelFor('freigabedatum')}</Label>
+        <DatePicker
+          id="freigabedatum"
+          placeholder=""
+          mode="date"
+          value={fields.freigabedatum ?? null}
+          onChange={v => setFields(f => ({ ...f, freigabedatum: v ?? undefined }))}
+        />
+      </div>
+    ),
     'vorhaben': (
       <div key="vorhaben" className="space-y-1.5">
         <Label htmlFor="vorhaben">{labelFor('vorhaben')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Combobox
           id="vorhaben"
-          placeholder="Welches Vorhaben?"
+          placeholder=""
           items={angebotsvorhabenListAll.map(r => ({
             id: r.record_id,
             label: displayNameOf('angebotsvorhaben', r.fields as Record<string, unknown>) || r.record_id,
@@ -432,7 +575,7 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
         <Label htmlFor="frage">{labelFor('frage')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Input
           id="frage"
-          placeholder="z. B. Angebot freigeben?"
+          placeholder=""
           value={fields.frage ?? ''}
           onChange={e => setFields(f => ({ ...f, frage: e.target.value }))}
           required
@@ -509,7 +652,7 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
         <Label htmlFor="begruendung">{labelFor('begruendung')}</Label>
         <Textarea
           id="begruendung"
-          placeholder="Warum so entschieden?"
+          placeholder=""
           value={fields.begruendung ?? ''}
           onChange={e => setFields(f => ({ ...f, begruendung: e.target.value }))}
           rows={3}
@@ -521,7 +664,7 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
         <Label htmlFor="bedingungen">{labelFor('bedingungen')}</Label>
         <Textarea
           id="bedingungen"
-          placeholder="Eine Bedingung pro Zeile"
+          placeholder=""
           value={fields.bedingungen ?? ''}
           onChange={e => setFields(f => ({ ...f, bedingungen: e.target.value }))}
           rows={3}
@@ -537,7 +680,7 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
           inputMode="decimal"
           step="any"
           {...numberInputProps(formEnhancements, 'finanzielle_auswirkung')}
-          placeholder="z. B. 25000"
+          placeholder=""
           value={fields.finanzielle_auswirkung !== undefined ? fields.finanzielle_auswirkung : (computedValues['finanzielle_auswirkung'] ?? '')}
           onChange={e => setFields(f => ({ ...f, finanzielle_auswirkung: clampNumberValue(formEnhancements, 'finanzielle_auswirkung', e.target.value) }))}
         />
@@ -548,7 +691,7 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
         <Label htmlFor="entscheider">{labelFor('entscheider')} <span className="text-destructive" aria-hidden="true">*</span></Label>
         <Combobox
           id="entscheider"
-          placeholder="Wer entscheidet?"
+          placeholder=""
           items={beteiligteListAll.map(r => ({
             id: r.record_id,
             label: displayNameOf('beteiligte', r.fields as Record<string, unknown>) || r.record_id,
@@ -568,7 +711,7 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
         <Label htmlFor="entscheidungsdatum">{labelFor('entscheidungsdatum')}</Label>
         <DatePicker
           id="entscheidungsdatum"
-          placeholder="Wann wurde entschieden?"
+          placeholder=""
           mode="date"
           value={fields.entscheidungsdatum ?? null}
           onChange={v => setFields(f => ({ ...f, entscheidungsdatum: v ?? undefined }))}
@@ -593,7 +736,7 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
         <Label htmlFor="aufgabe">{labelFor('aufgabe')}</Label>
         <Combobox
           id="aufgabe"
-          placeholder="Welche Aufgabe?"
+          placeholder=""
           items={aufgabenListAll.map(r => ({
             id: r.record_id,
             label: displayNameOf('aufgaben', r.fields as Record<string, unknown>) || r.record_id,
@@ -627,13 +770,13 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
   //     kein passendes Backend-Feld in orderedFields) erscheinen NICHT als
   //     Input, sondern unten als kompakte 'Berechnungen'-Übersicht oder als
   //     Inline-Hint unter dem letzten beitragenden Input.
-  const FIELD_LABELS: Record<string, string> = {"vorhaben": "Angebotsvorhaben", "frage": "Entscheidungsfrage", "ergebnis": "Ergebnis", "begruendung": "Begründung", "bedingungen": "Bedingungen", "finanzielle_auswirkung": "Finanzielle Auswirkung in Euro", "entscheider": "Entscheider", "entscheidungsdatum": "Entscheidungsdatum", "freigabe_noetig": "Freigabe durch höhere Ebene erforderlich", "aufgabe": "Zugehörige Aufgabe"};
+  const FIELD_LABELS: Record<string, string> = {"variante": "Angebotsvariante", "freigabestatus": "Freigabestatus", "freigeber": "Freigebende Person", "freigabedatum": "Freigabedatum", "vorhaben": "Angebotsvorhaben", "frage": "Entscheidungsfrage", "ergebnis": "Ergebnis", "begruendung": "Begründung", "bedingungen": "Bedingungen", "finanzielle_auswirkung": "Finanzielle Auswirkung in Euro", "entscheider": "Entscheider", "entscheidungsdatum": "Entscheidungsdatum", "freigabe_noetig": "Freigabe durch höhere Ebene erforderlich", "aufgabe": "Zugehörige Aufgabe"};
   const CURRENCY_KEYS = new Set<string>(["finanzielle_auswirkung"]);
   // Applookup-Referenz-Labels: pro applookup-Feld in dieser Form (ownKey)
   // eine Map { lookupKey: label } für ALLE Felder des Target-Schemas. Wird
   // beim Render-Walk gefiltert auf die in der computed-Formel tatsächlich
   // referenzierten lookupKeys (siehe applookupRefs unten).
-  const APPLOOKUP_LABELS: Record<string, Record<string, string>> = {"vorhaben": {"bezeichnung": "Vorhabenbezeichnung", "kundenname": "Kunde", "anfragenummer": "Anfragenummer", "eingangsdatum": "Eingangsdatum", "abgabefrist": "Abgabefrist", "anfragebeschreibung": "Kurzbeschreibung der Anfrage", "liefergegenstand": "Liefergegenstand", "phase": "Phase", "prioritaet": "Priorität", "auftragsvolumen": "Geschätztes Auftragsvolumen in Euro", "projektleitung": "Projektleitung", "besonderheiten": "Besonderheiten"}, "entscheider": {"entscheidungsgrenze": "Entscheidungsgrenze in Euro", "vorname": "Vorname", "nachname": "Nachname", "email": "E-Mail", "rolle": "Rolle", "telefon": "Telefon", "fachbereich": "Fachbereich", "aktiv": "Aktiv"}, "aufgabe": {"titel": "Titel", "vorhaben": "Angebotsvorhaben", "art": "Art der Untersuchung", "verantwortlicher": "Verantwortlicher", "faelligkeit": "Fälligkeit", "status": "Status", "ausloeser": "Auslöser", "fragestellung": "Fragestellung", "ergebnis": "Antwort oder Ergebnis", "folgeaufgabe_noetig": "Folgeaufgabe erforderlich", "folgeaufgabe_hinweis": "Hinweis zur Folgeaufgabe", "ausloesende_aufgabe": "Auslösende Aufgabe"}};
+  const APPLOOKUP_LABELS: Record<string, Record<string, string>> = {"variante": {"angebotspreis": "Angebotspreis in Euro", "akzeptierte_risiken": "Akzeptierte Risiken", "vorgaengerversion": "Vorgängerversion", "version": "Version", "vertragsbedingungen": "Vertragsbedingungen", "status": "Status", "herstellkosten": "Herstellkosten in Euro", "beschaffungskosten": "Beschaffungskosten in Euro", "aufwand_stunden": "Aufwand in Stunden", "vorhaben": "Angebotsvorhaben", "variantenbezeichnung": "Variantenbezeichnung", "beschreibung": "Beschreibung", "menge": "Menge", "teillieferung": "Teillieferung", "liefertermin": "Liefertermin"}, "freigeber": {"entscheidungsgrenze": "Entscheidungsgrenze in Euro", "vorname": "Vorname", "nachname": "Nachname", "email": "E-Mail", "rolle": "Rolle", "telefon": "Telefon", "fachbereich": "Fachbereich", "aktiv": "Aktiv"}, "vorhaben": {"bezeichnung": "Vorhabenbezeichnung", "kundenname": "Kunde", "anfragenummer": "Anfragenummer", "eingangsdatum": "Eingangsdatum", "abgabefrist": "Abgabefrist", "anfragebeschreibung": "Kurzbeschreibung der Anfrage", "liefergegenstand": "Liefergegenstand", "phase": "Phase", "prioritaet": "Priorität", "auftragsvolumen": "Geschätztes Auftragsvolumen in Euro", "projektleitung": "Projektleitung", "besonderheiten": "Besonderheiten"}, "entscheider": {"entscheidungsgrenze": "Entscheidungsgrenze in Euro", "vorname": "Vorname", "nachname": "Nachname", "email": "E-Mail", "rolle": "Rolle", "telefon": "Telefon", "fachbereich": "Fachbereich", "aktiv": "Aktiv"}, "aufgabe": {"titel": "Titel", "vorhaben": "Angebotsvorhaben", "art": "Art der Untersuchung", "verantwortlicher": "Verantwortlicher", "faelligkeit": "Fälligkeit", "status": "Status", "ausloeser": "Auslöser", "fragestellung": "Fragestellung", "ergebnis": "Antwort oder Ergebnis", "folgeaufgabe_noetig": "Folgeaufgabe erforderlich", "folgeaufgabe_hinweis": "Hinweis zur Folgeaufgabe", "ausloesende_aufgabe": "Auslösende Aufgabe"}};
   const inputFields = useMemo(() => flattenFieldOrder(orderedFields), [orderedFieldsKey]);
   const backendFieldSet = useMemo(() => new Set(inputFields), [inputFields.join(',')]);
   const virtualComputed = useMemo(
@@ -1014,24 +1157,25 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
         </form>
       </DialogContent>
     </Dialog>
-    {createAngebotsvorhabenOpen && (
-      <AngebotsvorhabenDialog
-        open={createAngebotsvorhabenOpen}
-        onClose={() => setCreateAngebotsvorhabenOpen(false)}
+    {createAngebotsvariantenOpen && (
+      <AngebotsvariantenDialog
+        open={createAngebotsvariantenOpen}
+        onClose={() => setCreateAngebotsvariantenOpen(false)}
         onSubmit={async (newFields) => {
-          const result = await LivingAppsService.createAngebotsvorhabenEntry(newFields as any) as { id?: string };
+          const result = await LivingAppsService.createAngebotsvariantenEntry(newFields as any) as { id?: string };
           if (result?.id) {
-            const newRec = { record_id: result.id, fields: newFields } as unknown as Angebotsvorhaben;
-            setExtraAngebotsvorhaben(prev => [...prev, newRec]);
-            const url = createRecordUrl(APP_IDS.ANGEBOTSVORHABEN, result.id);
-            setFields(prev => ({ ...prev, [createAngebotsvorhabenField]: url } as any));
+            const newRec = { record_id: result.id, fields: newFields } as unknown as Angebotsvarianten;
+            setExtraAngebotsvarianten(prev => [...prev, newRec]);
+            const url = createRecordUrl(APP_IDS.ANGEBOTSVARIANTEN, result.id);
+            setFields(prev => ({ ...prev, [createAngebotsvariantenField]: url } as any));
           }
-          setCreateAngebotsvorhabenOpen(false);
+          setCreateAngebotsvariantenOpen(false);
         }}
-        defaultValues={createAngebotsvorhabenInitial
-          ? ({ bezeichnung: createAngebotsvorhabenInitial } as any)
+        defaultValues={createAngebotsvariantenInitial
+          ? ({ variantenbezeichnung: createAngebotsvariantenInitial } as any)
           : undefined}
-        beteiligteList={beteiligteList}
+        angebotsvariantenList={angebotsvariantenList}
+        angebotsvorhabenList={angebotsvorhabenList}
       />
     )}
     {createBeteiligteOpen && (
@@ -1051,6 +1195,26 @@ export function EntscheidungenDialog({ open, onClose, onSubmit, defaultValues, r
         defaultValues={createBeteiligteInitial
           ? ({ vorname: createBeteiligteInitial } as any)
           : undefined}
+      />
+    )}
+    {createAngebotsvorhabenOpen && (
+      <AngebotsvorhabenDialog
+        open={createAngebotsvorhabenOpen}
+        onClose={() => setCreateAngebotsvorhabenOpen(false)}
+        onSubmit={async (newFields) => {
+          const result = await LivingAppsService.createAngebotsvorhabenEntry(newFields as any) as { id?: string };
+          if (result?.id) {
+            const newRec = { record_id: result.id, fields: newFields } as unknown as Angebotsvorhaben;
+            setExtraAngebotsvorhaben(prev => [...prev, newRec]);
+            const url = createRecordUrl(APP_IDS.ANGEBOTSVORHABEN, result.id);
+            setFields(prev => ({ ...prev, [createAngebotsvorhabenField]: url } as any));
+          }
+          setCreateAngebotsvorhabenOpen(false);
+        }}
+        defaultValues={createAngebotsvorhabenInitial
+          ? ({ bezeichnung: createAngebotsvorhabenInitial } as any)
+          : undefined}
+        beteiligteList={beteiligteList}
       />
     )}
     {createAufgabenOpen && (

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { format, addDays, differenceInCalendarDays, parseISO } from 'date-fns';
-import { IconAlertTriangle, IconPlus, IconListCheck, IconCalendarDue, IconGavel } from '@tabler/icons-react';
+import { IconAlertTriangle, IconPlus, IconListCheck, IconCalendarDue, IconGavel, IconChecklist, IconFileText, IconLink, IconArrowsExchange } from '@tabler/icons-react';
 import type { DashboardData } from '@/hooks/useDashboardData';
 import { useEntityCrud } from '@/components/EntityCrud';
 import { flowActionFor, countOf } from '@/config/plan';
@@ -228,6 +228,26 @@ export default function DashboardOverview({ data }: { data: DashboardData }) {
               value={decisionsOpen.length}
               icon={<IconGavel size={16} />}
               tone={decisionsOpen.length > 0 ? 'warning' : 'default'}
+            />
+            <StatStripItem
+              title={appLabel('anforderungen')}
+              value={data.anforderungen.length}
+              icon={<IconChecklist size={16} />}
+            />
+            <StatStripItem
+              title={appLabel('fachbeitraege')}
+              value={data.fachbeitraege.length}
+              icon={<IconFileText size={16} />}
+            />
+            <StatStripItem
+              title={appLabel('abhaengigkeiten')}
+              value={data.abhaengigkeiten.length}
+              icon={<IconLink size={16} />}
+            />
+            <StatStripItem
+              title={appLabel('angebotsuebernahmen')}
+              value={data.angebotsuebernahmen.length}
+              icon={<IconArrowsExchange size={16} />}
             />
           </StatStrip>
         ) : undefined}

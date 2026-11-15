@@ -1,0 +1,43 @@
+{
+  "pages": {
+    "en": {
+      " bei {0}": " at {0}",
+      " war vor {0} Tagen fällig.": " was due {0} days ago.",
+      "Ablauf für den Phasenwechsel geöffnet": "Workflow opened for phase change",
+      "Aufgabe abschließen": "Complete task",
+      "Aufgabe planen": "Plan task",
+      "Aufgabe öffnen": "Open task",
+      "Bald fällig: {0} — Frist in den nächsten 14 Tagen.": "Due soon: {0} — deadline within the next 14 days.",
+      "Bearbeiten": "Edit",
+      "Entscheidungen mit Freigabe oder vertagt": "Decisions with approval or postponed",
+      "Entscheidungen offen bei {0}.": "Decisions pending with {0}.",
+      "Folgeaufgabe nötig": "Follow-up task required",
+      "Freigabe / vertagt": "Approval / postponed",
+      "Freigabe nötig": "Approval required",
+      "Frist in 14 Tagen": "Deadline in 14 days",
+      "Frist {0}": "Due {0}",
+      "Hohe Priorität": "High priority",
+      "Hohe Priorität: {0}.": "High priority: {0}.",
+      "Keine Entscheidung wartet auf Freigabe.": "No decision is waiting for approval.",
+      "Keine offenen Aufgaben — der Bearbeitungsplan ist abgearbeitet.": "No open tasks — the work plan is complete.",
+      "Laufende Vorhaben: {0}.": "Ongoing projects: {0}.",
+      "Lege dein erstes Angebotsvorhaben an, um den Bearbeitungsplan zu starten.": "Create your first offer project to start the work plan.",
+      "Neues Vorhaben": "New project",
+      "Nächste Phase festhalten": "Record next phase",
+      "Offene Aufgaben": "Open tasks",
+      "Ohne Bezeichnung": "Untitled",
+      "Ohne Frage": "No question",
+      "Ohne Frist": "No deadline",
+      "Ohne Titel": "Untitled",
+      "Phasenwechsel im Ablauf bestätigen": "Confirm phase change in workflow",
+      "Phasenwechsel ist nur über den Ablauf möglich — öffne das Vorhaben.": "Phase change is only possible via the workflow — open the project.",
+      "Vertagt": "Postponed",
+      "fällig {0}": "due {0}",
+      "ohne Fälligkeit": "no due date",
+      "überfällig": "overdue",
+      "„{0}“": "\"{0}\"",
+      "✓ Abschließen": "✓ Complete"
+    }
+  },
+  "v": 1
+}

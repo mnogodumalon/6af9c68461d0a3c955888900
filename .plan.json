@@ -1,0 +1,385 @@
+{
+  "version": 1,
+  "language": "de",
+  "understanding": {
+    "summary": "Du bekommst eine Anwendung für die technische Angebotserstellung. Jede Kundenanfrage ist ein dauerhaftes Angebotsvorhaben mit Phase, Projektleitung, Abgabefrist und geschätztem Volumen. Dazu gehört ein veränderbarer Bearbeitungsplan aus Aufgaben (Untersuchungen wie Machbarkeit, Beschaffung, Ressourcen, Kosten, Risiken), die einem Verantwortlichen zugeordnet sind und Folgeaufgaben auslösen können, auch spontan ergänzt. Entscheidungen werden mit Ergebnis, Begründung, Bedingungen und finanzieller Auswirkung festgehalten, wobei die Entscheidungsgrenze des Entscheiders zeigt, ob eine Freigabe höherer Ebene nötig ist. Angebotsvarianten, etwa eine neue Variante bei akzeptierter Teillieferung, werden je Vorhaben mit Kosten, Aufwand und Status geführt.",
+    "outside_users": [],
+    "roles": [
+      "Projektleitung",
+      "Fachbereiche (Vertrieb, Konstruktion, Einkauf, Ressourcenplanung u. a.)",
+      "Geschäftsleitung"
+    ],
+    "main_tasks": [
+      "Angebotsvorhaben anlegen und durch die Phasen führen",
+      "Aufgaben planen, bearbeiten und Folgeaufgaben anlegen",
+      "Entscheidungen festhalten und Entscheidungsgrenzen prüfen",
+      "Angebotsvarianten erfassen und die vorzulegende Variante wählen"
+    ],
+    "platform_roles": [
+      {
+        "persona": "Projektleitung",
+        "role": "datenverarbeitung",
+        "apps": [
+          "angebotsvorhaben",
+          "angebotsvarianten",
+          "aufgaben",
+          "entscheidungen",
+          "beteiligte"
+        ]
+      },
+      {
+        "persona": "Fachbereiche",
+        "role": "standard",
+        "apps": [
+          "aufgaben",
+          "entscheidungen",
+          "angebotsvorhaben",
+          "angebotsvarianten",
+          "beteiligte"
+        ]
+      },
+      {
+        "persona": "Geschäftsleitung",
+        "role": "administrator",
+        "apps": [
+          "angebotsvorhaben",
+          "angebotsvarianten",
+          "aufgaben",
+          "entscheidungen",
+          "beteiligte"
+        ]
+      }
+    ],
+    "wish_kind": "plain",
+    "wish_signals": []
+  },
+  "flows": [
+    {
+      "slug": "vorhaben-anlegen",
+      "label": {
+        "de": "Angebotsvorhaben anlegen",
+        "en": "Create offer project"
+      },
+      "description": "Eine neue Kundenanfrage als Angebotsvorhaben erfassen, Projektleitung zuordnen und die erste Prüfaufgabe planen.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "angebotsvorhaben",
+          "op": "create",
+          "when": "always",
+          "fields": {
+            "bezeichnung": "user",
+            "kundenname": "user",
+            "anfragenummer": "user",
+            "eingangsdatum": "user",
+            "abgabefrist": "user",
+            "anfragebeschreibung": "user",
+            "auftragsvolumen": "user",
+            "prioritaet": "user",
+            "projektleitung": "picked",
+            "phase": "fixed:anfragepruefung"
+          },
+          "multiple": false,
+          "needs": {},
+          "defaults": []
+        },
+        {
+          "entity": "aufgaben",
+          "op": "create",
+          "when": "always",
+          "fields": {
+            "vorhaben": "picked",
+            "titel": "user",
+            "art": "fixed:pruefentscheidung",
+            "verantwortlicher": "picked",
+            "faelligkeit": "user",
+            "status": "fixed:aktiv",
+            "ausloeser": "fixed:vorgabe",
+            "fragestellung": "user"
+          },
+          "multiple": false,
+          "needs": {},
+          "defaults": []
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `vorhaben-anlegen` — Angebotsvorhaben anlegen\nEine neue Kundenanfrage als Angebotsvorhaben erfassen, Projektleitung zuordnen und die erste Prüfaufgabe planen.\n\n## Your hook — import it, never rebuild what it owns\n`import { useVorhabenAnlegenFlow } from '@/lib/journey/flows/VorhabenAnlegen';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick: projektleitung, vorhaben, verantwortlicher), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Kunde, Bezeichnung, Anfragenummer, Fristen und Beschreibung erfassen\n2. Projektleitung aus den aktiven Beteiligten wählen\n3. Erste Aufgabe zur Prüfentscheidung anlegen\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- creates `angebotsvorhaben`:\n    - `bezeichnung`: the user enters it (bind it through the layer: form.field/…)\n    - `kundenname`: the user enters it (bind it through the layer: form.field/…)\n    - `anfragenummer`: the user enters it (bind it through the layer: form.field/…)\n    - `eingangsdatum`: the user enters it (bind it through the layer: form.field/…)\n    - `abgabefrist`: the user enters it (bind it through the layer: form.field/…)\n    - `anfragebeschreibung`: the user enters it (bind it through the layer: form.field/…)\n    - `auftragsvolumen`: the user enters it (bind it through the layer: form.field/…)\n    - `prioritaet`: the user enters it (bind it through the layer: form.field/…)\n    - `projektleitung`: from the record the user picks in this flow\n    - `phase`: fixed value `anfragepruefung` — set it in the plan step's values, never ask\n- creates `aufgaben`:\n    - `vorhaben`: from the record the user picks in this flow\n    - `titel`: the user enters it (bind it through the layer: form.field/…)\n    - `art`: fixed value `pruefentscheidung` — set it in the plan step's values, never ask\n    - `verantwortlicher`: from the record the user picks in this flow\n    - `faelligkeit`: the user enters it (bind it through the layer: form.field/…)\n    - `status`: fixed value `aktiv` — set it in the plan step's values, never ask\n    - `ausloeser`: fixed value `vorgabe` — set it in the plan step's values, never ask\n    - `fragestellung`: the user enters it (bind it through the layer: form.field/…)\n\n## Reads\n- `beteiligte` columns vorname, nachname, fachbereich\n\n## Narrow these picks (the plan has no filter for them — J-3)\n- `vorhaben` picks `angebotsvorhaben`, but the plan calls 'phase' its status field: pass `where: { vorhaben: r => … }` to the hook so the step offers only the records that belong here (the open ones, the ones of the picked parent) — never every record of every state\n\n## Success page\n- shows: `angebotsvorhaben.bezeichnung`, `angebotsvorhaben.phase`\n- next flows to offer: `aufgabe-bearbeiten`\n\n## Never write these — another flow or a tool owns them\n- `aufgaben.ergebnis` (owner: intent `aufgabe-bearbeiten`)\n- `aufgaben.folgeaufgabe_noetig` (owner: intent `aufgabe-bearbeiten`)\n- `aufgaben.folgeaufgabe_hinweis` (owner: intent `aufgabe-bearbeiten`)\n- `aufgaben.ausloesende_aufgabe` (owner: intent `aufgabe-bearbeiten`)\n- `entscheidungen.vorhaben` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.aufgabe` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.entscheider` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.frage` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.ergebnis` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.begruendung` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.bedingungen` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.finanzielle_auswirkung` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.freigabe_noetig` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.entscheidungsdatum` (owner: intent `entscheidung-festhalten`)\n- `angebotsvarianten.vorhaben` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.variantenbezeichnung` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.beschreibung` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.menge` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.teillieferung` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.herstellkosten` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.beschaffungskosten` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.aufwand_stunden` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.angebotspreis` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.akzeptierte_risiken` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.vertragsbedingungen` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.liefertermin` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.status` (owner: intent `variante-erfassen`)\n"
+    },
+    {
+      "slug": "aufgabe-bearbeiten",
+      "label": {
+        "de": "Aufgabe bearbeiten",
+        "en": "Work on task"
+      },
+      "description": "Das Ergebnis einer Aufgabe festhalten und bei Bedarf direkt eine Folgeaufgabe für einen anderen Fachbereich anlegen.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "aufgaben",
+          "op": "update",
+          "when": "always",
+          "fields": {
+            "ergebnis": "user",
+            "status": "user",
+            "folgeaufgabe_noetig": "user",
+            "folgeaufgabe_hinweis": "user"
+          },
+          "multiple": false,
+          "needs": {},
+          "defaults": []
+        },
+        {
+          "entity": "aufgaben",
+          "op": "create",
+          "when": "optional",
+          "fields": {
+            "vorhaben": "picked",
+            "titel": "user",
+            "art": "user",
+            "verantwortlicher": "picked",
+            "faelligkeit": "user",
+            "fragestellung": "user:from_pick:aufgaben.folgeaufgabe_hinweis",
+            "ausloesende_aufgabe": "picked",
+            "ausloeser": "fixed:folge",
+            "status": "fixed:geplant"
+          },
+          "multiple": true,
+          "needs": {},
+          "defaults": []
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `aufgabe-bearbeiten` — Aufgabe bearbeiten\nDas Ergebnis einer Aufgabe festhalten und bei Bedarf direkt eine Folgeaufgabe für einen anderen Fachbereich anlegen.\n\n## Your hook — import it, never rebuild what it owns\n`import { useAufgabeBearbeitenFlow } from '@/lib/journey/flows/AufgabeBearbeiten';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick: vorhaben, verantwortlicher, ausloesende_aufgabe), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. This flow CHANGES a record of `aufgaben`: `{...flow.picks.aufgaben.select} {...flow.pick('aufgaben')}` picks it, the hook prefills the form with its current values and updates THAT record — never a create step, never a list from useDashboardData. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Offene Aufgabe wählen\n2. Antwort oder Ergebnis eintragen und Status setzen\n3. Angeben, ob eine Folgeaufgabe nötig ist, mit Hinweis\n4. Folgeaufgabe mit Verantwortlichem und Fälligkeit anlegen\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- updates `aufgaben`:\n    - `ergebnis`: the user enters it (bind it through the layer: form.field/…)\n    - `status`: the user enters it (bind it through the layer: form.field/…)\n    - `folgeaufgabe_noetig`: the user enters it (bind it through the layer: form.field/…)\n    - `folgeaufgabe_hinweis`: the user enters it (bind it through the layer: form.field/…)\n- creates `aufgaben` (only when the flow needs it) — SEVERAL per run: `flow.lists.aufgaben` holds the entries (add/remove/edit), render the editor's fields inside `<ListEntries list={flow.lists.aufgaben}>` on their own step; the plan creates one record per entry:\n    - `vorhaben`: from the record the user picks in this flow\n    - `titel`: the user enters it (bind it through the layer: form.field/…)\n    - `art`: the user enters it (bind it through the layer: form.field/…)\n    - `verantwortlicher`: from the record the user picks in this flow\n    - `faelligkeit`: the user enters it (bind it through the layer: form.field/…)\n    - `fragestellung`: prefilled from the picked record's `aufgaben.folgeaufgabe_hinweis` by the hook (a path follows each reference), the user may change it — bind it, never set it yourself\n    - `ausloesende_aufgabe`: from the record the user picks in this flow\n    - `ausloeser`: fixed value `folge` — set it in the plan step's values, never ask\n    - `status`: fixed value `geplant` — set it in the plan step's values, never ask\n\n## Reads\n- `aufgaben` columns titel, vorhaben, art, verantwortlicher, faelligkeit, status\n- `beteiligte` columns vorname, nachname, fachbereich\n\n## Narrow these picks (the plan has no filter for them — J-3)\n- `vorhaben` picks `angebotsvorhaben`, but the plan calls 'phase' its status field: pass `where: { vorhaben: r => … }` to the hook so the step offers only the records that belong here (the open ones, the ones of the picked parent) — never every record of every state\n\n## Success page\n- the review ends with ONE button per way to finish — spread `variants={flow.actions}` onto <SummaryStep>, never write your own confirm buttons: „Als erledigt speichern“ sets status=erledigt; „Speichern, wartet auf Antwort“ sets status=wartet\n- the success page offers the way back — `undo={flow.undo}` on <SuccessStep>: „Aufgabe wieder öffnen“ sets status=aktiv\n- shows: `aufgaben.titel`, `aufgaben.status`\n- next flows to offer: `entscheidung-festhalten`\n\n## Never write these — another flow or a tool owns them\n- `angebotsvorhaben.bezeichnung` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.kundenname` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.anfragenummer` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.eingangsdatum` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.abgabefrist` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.anfragebeschreibung` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.auftragsvolumen` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.prioritaet` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.projektleitung` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.phase` (owner: intent `vorhaben-anlegen`)\n- `entscheidungen.vorhaben` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.aufgabe` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.entscheider` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.frage` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.ergebnis` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.begruendung` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.bedingungen` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.finanzielle_auswirkung` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.freigabe_noetig` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.entscheidungsdatum` (owner: intent `entscheidung-festhalten`)\n- `angebotsvarianten.vorhaben` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.variantenbezeichnung` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.beschreibung` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.menge` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.teillieferung` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.herstellkosten` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.beschaffungskosten` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.aufwand_stunden` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.angebotspreis` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.akzeptierte_risiken` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.vertragsbedingungen` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.liefertermin` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.status` (owner: intent `variante-erfassen`)\n"
+    },
+    {
+      "slug": "entscheidung-festhalten",
+      "label": {
+        "de": "Entscheidung festhalten",
+        "en": "Record decision"
+      },
+      "description": "Eine Entscheidung zu einem Vorhaben mit Ergebnis, Begründung und finanzieller Auswirkung erfassen und die Phase weiterführen.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "entscheidungen",
+          "op": "create",
+          "when": "always",
+          "fields": {
+            "vorhaben": "picked",
+            "aufgabe": "picked",
+            "entscheider": "picked",
+            "frage": "user",
+            "ergebnis": "user",
+            "begruendung": "user",
+            "bedingungen": "user",
+            "finanzielle_auswirkung": "user",
+            "freigabe_noetig": "user",
+            "entscheidungsdatum": "derived:today"
+          },
+          "multiple": false,
+          "needs": {},
+          "defaults": []
+        },
+        {
+          "entity": "angebotsvorhaben",
+          "op": "update",
+          "when": "optional",
+          "fields": {
+            "phase": "user"
+          },
+          "multiple": false,
+          "needs": {},
+          "defaults": []
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `entscheidung-festhalten` — Entscheidung festhalten\nEine Entscheidung zu einem Vorhaben mit Ergebnis, Begründung und finanzieller Auswirkung erfassen und die Phase weiterführen.\n\n## Your hook — import it, never rebuild what it owns\n`import { useEntscheidungFesthaltenFlow } from '@/lib/journey/flows/EntscheidungFesthalten';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick: vorhaben, aufgabe, entscheider), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. This flow CHANGES a record of `angebotsvorhaben`: `{...flow.picks.angebotsvorhaben.select} {...flow.pick('angebotsvorhaben')}` picks it, the hook prefills the form with its current values and updates THAT record — never a create step, never a list from useDashboardData. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Vorhaben und ggf. zugehörige Aufgabe wählen\n2. Entscheider wählen\n3. Frage, Ergebnis, Begründung, Bedingungen und finanzielle Auswirkung erfassen\n4. Freigabe markieren, wenn die Entscheidungsgrenze überschritten ist\n5. Phase des Vorhabens setzen\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- creates `entscheidungen`:\n    - `vorhaben`: from the record the user picks in this flow\n    - `aufgabe`: from the record the user picks in this flow\n    - `entscheider`: from the record the user picks in this flow\n    - `frage`: the user enters it (bind it through the layer: form.field/…)\n    - `ergebnis`: the user enters it (bind it through the layer: form.field/…)\n    - `begruendung`: the user enters it (bind it through the layer: form.field/…)\n    - `bedingungen`: the user enters it (bind it through the layer: form.field/…)\n    - `finanzielle_auswirkung`: the user enters it (bind it through the layer: form.field/…)\n    - `freigabe_noetig`: the user enters it (bind it through the layer: form.field/…)\n    - `entscheidungsdatum`: derived: today() — set it in the plan step, never ask\n- updates `angebotsvorhaben` (only when the flow needs it):\n    - `phase`: the user enters it (bind it through the layer: form.field/…)\n\n## Reads\n- `angebotsvorhaben` columns bezeichnung, kundenname, phase\n- `aufgaben` columns titel, art, status\n- `beteiligte` columns vorname, nachname, entscheidungsgrenze\n\n## Success page\n- the success page offers the way back — `undo={flow.undo}` on <SuccessStep>: „Phase zurück auf Anfrageprüfung“ sets phase=anfragepruefung\n- shows: `entscheidungen.frage`, `entscheidungen.ergebnis`\n- next flows to offer: `variante-erfassen`\n\n## Never write these — another flow or a tool owns them\n- `angebotsvorhaben.bezeichnung` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.kundenname` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.anfragenummer` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.eingangsdatum` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.abgabefrist` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.anfragebeschreibung` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.auftragsvolumen` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.prioritaet` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.projektleitung` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.vorhaben` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.titel` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.art` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.verantwortlicher` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.faelligkeit` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.status` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.ausloeser` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.fragestellung` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.ergebnis` (owner: intent `aufgabe-bearbeiten`)\n- `aufgaben.folgeaufgabe_noetig` (owner: intent `aufgabe-bearbeiten`)\n- `aufgaben.folgeaufgabe_hinweis` (owner: intent `aufgabe-bearbeiten`)\n- `aufgaben.ausloesende_aufgabe` (owner: intent `aufgabe-bearbeiten`)\n- `angebotsvarianten.vorhaben` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.variantenbezeichnung` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.beschreibung` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.menge` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.teillieferung` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.herstellkosten` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.beschaffungskosten` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.aufwand_stunden` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.angebotspreis` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.akzeptierte_risiken` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.vertragsbedingungen` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.liefertermin` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.status` (owner: intent `variante-erfassen`)\n"
+    },
+    {
+      "slug": "variante-erfassen",
+      "label": {
+        "de": "Angebotsvariante erfassen",
+        "en": "Add offer variant"
+      },
+      "description": "Eine neue Angebotsvariante zu einem Vorhaben anlegen, etwa bei akzeptierter Teillieferung, mit Mengen, Kosten und Liefertermin.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "angebotsvarianten",
+          "op": "create",
+          "when": "always",
+          "fields": {
+            "vorhaben": "picked",
+            "variantenbezeichnung": "user",
+            "beschreibung": "user",
+            "menge": "user",
+            "teillieferung": "user",
+            "herstellkosten": "user",
+            "beschaffungskosten": "user",
+            "aufwand_stunden": "user",
+            "angebotspreis": "user",
+            "akzeptierte_risiken": "user",
+            "vertragsbedingungen": "user",
+            "liefertermin": "user",
+            "status": "fixed:entwurf"
+          },
+          "multiple": false,
+          "needs": {},
+          "defaults": []
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `variante-erfassen` — Angebotsvariante erfassen\nEine neue Angebotsvariante zu einem Vorhaben anlegen, etwa bei akzeptierter Teillieferung, mit Mengen, Kosten und Liefertermin.\n\n## Your hook — import it, never rebuild what it owns\n`import { useVarianteErfassenFlow } from '@/lib/journey/flows/VarianteErfassen';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick: vorhaben), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Vorhaben wählen\n2. Bezeichnung, Beschreibung, Menge und Teillieferung erfassen\n3. Herstellkosten, Beschaffungskosten, Aufwand und Preis eintragen\n4. Risiken, Vertragsbedingungen und Liefertermin ergänzen\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- creates `angebotsvarianten`:\n    - `vorhaben`: from the record the user picks in this flow\n    - `variantenbezeichnung`: the user enters it (bind it through the layer: form.field/…)\n    - `beschreibung`: the user enters it (bind it through the layer: form.field/…)\n    - `menge`: the user enters it (bind it through the layer: form.field/…)\n    - `teillieferung`: the user enters it (bind it through the layer: form.field/…)\n    - `herstellkosten`: the user enters it (bind it through the layer: form.field/…)\n    - `beschaffungskosten`: the user enters it (bind it through the layer: form.field/…)\n    - `aufwand_stunden`: the user enters it (bind it through the layer: form.field/…)\n    - `angebotspreis`: the user enters it (bind it through the layer: form.field/…)\n    - `akzeptierte_risiken`: the user enters it (bind it through the layer: form.field/…)\n    - `vertragsbedingungen`: the user enters it (bind it through the layer: form.field/…)\n    - `liefertermin`: the user enters it (bind it through the layer: form.field/…)\n    - `status`: fixed value `entwurf` — set it in the plan step's values, never ask\n\n## Reads\n- `angebotsvorhaben` columns bezeichnung, kundenname, phase\n\n## Success page\n- shows: `angebotsvarianten.variantenbezeichnung`, `angebotsvarianten.status`\n- next flows to offer: `variante-vorlegen`\n\n## Never write these — another flow or a tool owns them\n- `angebotsvorhaben.bezeichnung` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.kundenname` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.anfragenummer` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.eingangsdatum` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.abgabefrist` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.anfragebeschreibung` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.auftragsvolumen` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.prioritaet` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.projektleitung` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.phase` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.vorhaben` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.titel` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.art` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.verantwortlicher` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.faelligkeit` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.status` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.ausloeser` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.fragestellung` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.ergebnis` (owner: intent `aufgabe-bearbeiten`)\n- `aufgaben.folgeaufgabe_noetig` (owner: intent `aufgabe-bearbeiten`)\n- `aufgaben.folgeaufgabe_hinweis` (owner: intent `aufgabe-bearbeiten`)\n- `aufgaben.ausloesende_aufgabe` (owner: intent `aufgabe-bearbeiten`)\n- `entscheidungen.vorhaben` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.aufgabe` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.entscheider` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.frage` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.ergebnis` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.begruendung` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.bedingungen` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.finanzielle_auswirkung` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.freigabe_noetig` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.entscheidungsdatum` (owner: intent `entscheidung-festhalten`)\n"
+    },
+    {
+      "slug": "variante-vorlegen",
+      "label": {
+        "de": "Variante dem Kunden vorlegen",
+        "en": "Present variant to customer"
+      },
+      "description": "Die gewählte Variante als vorgelegt markieren, die übrigen verwerfen und das Vorhaben als abgegeben abschließen.",
+      "priority": "nice",
+      "writes": [
+        {
+          "entity": "angebotsvarianten",
+          "op": "update",
+          "when": "always",
+          "fields": {},
+          "multiple": false,
+          "needs": {},
+          "defaults": []
+        },
+        {
+          "entity": "angebotsvorhaben",
+          "op": "update",
+          "when": "always",
+          "fields": {
+            "phase": "fixed:angebot_abgegeben"
+          },
+          "multiple": false,
+          "needs": {},
+          "defaults": []
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `variante-vorlegen` — Variante dem Kunden vorlegen\nDie gewählte Variante als vorgelegt markieren, die übrigen verwerfen und das Vorhaben als abgegeben abschließen.\n\n## Your hook — import it, never rebuild what it owns\n`import { useVarianteVorlegenFlow } from '@/lib/journey/flows/VarianteVorlegen';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. This flow CHANGES a record of `angebotsvarianten`: `{...flow.picks.angebotsvarianten.select} {...flow.pick('angebotsvarianten')}` picks it, the hook prefills the form with its current values and updates THAT record — never a create step, never a list from useDashboardData. This flow CHANGES a record of `angebotsvorhaben`: `{...flow.picks.angebotsvorhaben.select} {...flow.pick('angebotsvorhaben')}` picks it, the hook prefills the form with its current values and updates THAT record — never a create step, never a list from useDashboardData. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Vorhaben wählen\n2. Intern freigegebene Variante wählen\n3. Bestätigen, dass die Variante vorgelegt wird\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- updates `angebotsvarianten`:\n- updates `angebotsvorhaben`:\n    - `phase`: fixed value `angebot_abgegeben` — set it in the plan step's values, never ask\n\n## Reads\n- `angebotsvorhaben` columns bezeichnung, kundenname, phase\n- `angebotsvarianten` columns variantenbezeichnung, angebotspreis, status\n\n## Success page\n- the success page offers the way back — `undo={flow.undo}` on <SuccessStep>: „Vorlage zurücknehmen“ sets status=intern_freigegeben\n- shows: `angebotsvarianten.variantenbezeichnung`, `angebotsvorhaben.phase`\n\n## Never write these — another flow or a tool owns them\n- `angebotsvorhaben.bezeichnung` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.kundenname` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.anfragenummer` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.eingangsdatum` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.abgabefrist` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.anfragebeschreibung` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.auftragsvolumen` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.prioritaet` (owner: intent `vorhaben-anlegen`)\n- `angebotsvorhaben.projektleitung` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.vorhaben` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.titel` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.art` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.verantwortlicher` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.faelligkeit` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.status` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.ausloeser` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.fragestellung` (owner: intent `vorhaben-anlegen`)\n- `aufgaben.ergebnis` (owner: intent `aufgabe-bearbeiten`)\n- `aufgaben.folgeaufgabe_noetig` (owner: intent `aufgabe-bearbeiten`)\n- `aufgaben.folgeaufgabe_hinweis` (owner: intent `aufgabe-bearbeiten`)\n- `aufgaben.ausloesende_aufgabe` (owner: intent `aufgabe-bearbeiten`)\n- `entscheidungen.vorhaben` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.aufgabe` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.entscheider` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.frage` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.ergebnis` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.begruendung` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.bedingungen` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.finanzielle_auswirkung` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.freigabe_noetig` (owner: intent `entscheidung-festhalten`)\n- `entscheidungen.entscheidungsdatum` (owner: intent `entscheidung-festhalten`)\n- `angebotsvarianten.vorhaben` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.variantenbezeichnung` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.beschreibung` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.menge` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.teillieferung` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.herstellkosten` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.beschaffungskosten` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.aufwand_stunden` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.angebotspreis` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.akzeptierte_risiken` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.vertragsbedingungen` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.liefertermin` (owner: intent `variante-erfassen`)\n- `angebotsvarianten.status` (owner: intent `variante-erfassen`)\n"
+    }
+  ],
+  "public_pages": [],
+  "tools": [
+    {
+      "id": "ueberfaellige-aufgaben-melden",
+      "purpose": "Täglich per Mail an den Schlüsselinhaber eine Zusammenfassung der Aufgaben, deren Fälligkeit vorbei ist und die noch offen sind. Schreibt keine Felder."
+    },
+    {
+      "id": "abgabefrist-melden",
+      "purpose": "Täglich per Mail an den Schlüsselinhaber eine Zusammenfassung der Vorhaben, deren Abgabefrist in den nächsten 7 Tagen liegt und die noch nicht abgegeben oder abgebrochen sind. Schreibt keine Felder."
+    },
+    {
+      "id": "varianten-verwerfen",
+      "purpose": "Wenn eine Angebotsvariante auf vorgelegt gesetzt wird, werden die übrigen Entwurfs- und intern freigegebenen Varianten desselben Vorhabens verworfen. Prüft im Code, ob der Status vorgelegt ist; die anderen Varianten desselben Vorhabens werden aktualisiert."
+    }
+  ],
+  "covered_by_platform": [
+    {
+      "wish": "Menschen können während der Bearbeitung zusätzliche Aufgaben einplanen",
+      "feature": "record_form"
+    },
+    {
+      "wish": "Übersicht und Suche über Vorhaben, Aufgaben und Entscheidungen",
+      "feature": "search_filter"
+    },
+    {
+      "wish": "Änderungen nachvollziehen",
+      "feature": "record_history"
+    },
+    {
+      "wish": "Unterlagen zu Vorhaben anhängen",
+      "feature": "record_attachments"
+    },
+    {
+      "wish": "Feste Verantwortlichkeiten und Zugriffe",
+      "feature": "user_roles"
+    }
+  ],
+  "ownership": {
+    "angebotsvorhaben": {
+      "bezeichnung": "intent:vorhaben-anlegen",
+      "kundenname": "intent:vorhaben-anlegen",
+      "anfragenummer": "intent:vorhaben-anlegen",
+      "eingangsdatum": "intent:vorhaben-anlegen",
+      "abgabefrist": "intent:vorhaben-anlegen",
+      "anfragebeschreibung": "intent:vorhaben-anlegen",
+      "auftragsvolumen": "intent:vorhaben-anlegen",
+      "prioritaet": "intent:vorhaben-anlegen",
+      "projektleitung": "intent:vorhaben-anlegen",
+      "phase": "intent:variante-vorlegen"
+    },
+    "aufgaben": {
+      "vorhaben": "intent:aufgabe-bearbeiten",
+      "titel": "intent:aufgabe-bearbeiten",
+      "art": "intent:aufgabe-bearbeiten",
+      "verantwortlicher": "intent:aufgabe-bearbeiten",
+      "faelligkeit": "intent:aufgabe-bearbeiten",
+      "status": "intent:aufgabe-bearbeiten",
+      "ausloeser": "intent:aufgabe-bearbeiten",
+      "fragestellung": "intent:aufgabe-bearbeiten",
+      "ergebnis": "intent:aufgabe-bearbeiten",
+      "folgeaufgabe_noetig": "intent:aufgabe-bearbeiten",
+      "folgeaufgabe_hinweis": "intent:aufgabe-bearbeiten",
+      "ausloesende_aufgabe": "intent:aufgabe-bearbeiten"
+    },
+    "entscheidungen": {
+      "vorhaben": "intent:entscheidung-festhalten",
+      "aufgabe": "intent:entscheidung-festhalten",
+      "entscheider": "intent:entscheidung-festhalten",
+      "frage": "intent:entscheidung-festhalten",
+      "ergebnis": "intent:entscheidung-festhalten",
+      "begruendung": "intent:entscheidung-festhalten",
+      "bedingungen": "intent:entscheidung-festhalten",
+      "finanzielle_auswirkung": "intent:entscheidung-festhalten",
+      "freigabe_noetig": "intent:entscheidung-festhalten",
+      "entscheidungsdatum": "intent:entscheidung-festhalten"
+    },
+    "angebotsvarianten": {
+      "vorhaben": "intent:variante-erfassen",
+      "variantenbezeichnung": "intent:variante-erfassen",
+      "beschreibung": "intent:variante-erfassen",
+      "menge": "intent:variante-erfassen",
+      "teillieferung": "intent:variante-erfassen",
+      "herstellkosten": "intent:variante-erfassen",
+      "beschaffungskosten": "intent:variante-erfassen",
+      "aufwand_stunden": "intent:variante-erfassen",
+      "angebotspreis": "intent:variante-erfassen",
+      "akzeptierte_risiken": "intent:variante-erfassen",
+      "vertragsbedingungen": "intent:variante-erfassen",
+      "liefertermin": "intent:variante-erfassen",
+      "status": "tool:varianten-verwerfen"
+    }
+  },
+  "dashboard": {
+    "focus": [
+      "Vorhaben je Phase und nahe Abgabefristen",
+      "Offene und wartende Aufgaben mit Fälligkeit",
+      "Aufgaben mit erforderlicher Folgeaufgabe",
+      "Entscheidungen mit nötiger Freigabe oder vertagt"
+    ],
+    "hints": [
+      "Überfällige Aufgaben hervorheben",
+      "Vorhaben mit hoher Priorität zuerst zeigen",
+      "Je Vorhaben die Varianten und Entscheidungen verknüpft anzeigen"
+    ],
+    "views": [],
+    "writes": [
+      {
+        "entity": "angebotsvorhaben",
+        "fields": [
+          "prioritaet"
+        ],
+        "how": "inline",
+        "rule": ""
+      }
+    ],
+    "wishes": []
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "entities": {
+    "Beteiligte": {
+      "placeholders_set": 6,
+      "defaults_keys": [
+        "aktiv"
+      ],
+      "computed_keys": [],
+      "reason": "Pure master data of participants without a date pair or price chain, so no formulas are sensible."
+    },
+    "Angebotsvorhaben": {
+      "placeholders_set": 11,
+      "defaults_keys": [
+        "eingangsdatum",
+        "abgabefrist",
+        "phase",
+        "prioritaet"
+      ],
+      "computed_keys": [
+        "_vorhaben_dauer_tage"
+      ],
+      "reason": "Eingangsdatum und Abgabefrist bilden ein Datumspaar, daher eine Dauer in Tagen als virtuelles Feld; das Auftragsvolumen hat keine Rechenkette über die Entscheidungsgrenze ohne Fallunterscheidung."
+    },
+    "Angebotsvarianten": {
+      "placeholders_set": 11,
+      "defaults_keys": [
+        "status",
+        "menge"
+      ],
+      "computed_keys": [],
+      "reason": "Keine Formel, da Angebotspreis eine freie Eingabe ist und sich ohne Fallunterscheidung oder Marge nicht sinnvoll aus Kosten und Auftragsvolumen berechnen lässt."
+    },
+    "Aufgaben": {
+      "placeholders_set": 9,
+      "defaults_keys": [
+        "status",
+        "faelligkeit"
+      ],
+      "computed_keys": [],
+      "reason": "Aufgaben sind Stammdaten ohne Mengen- oder Datumspaar, daher keine sinnvolle Berechnung."
+    },
+    "Entscheidungen": {
+      "placeholders_set": 8,
+      "defaults_keys": [
+        "entscheidungsdatum"
+      ],
+      "computed_keys": [],
+      "reason": "Keine Formel, da die finanzielle Auswirkung eine freie Eingabe ist und kein Datumspaar oder Mengen-Preis-Zusammenhang besteht."
+    }
+  }
+}

@@ -1,0 +1,31 @@
+Erstelle eine Anwendung, mit der gemeinsame Vorhaben mit einem veränderlichen Ablauf durchführbar sind.
+
+Dies soll auf die  technische Angebotserstellung angewandt werden. Sie besteht aus miteinander verbundenen Untersuchungen und Entscheidungen:
+
+﻿﻿Wollen wir in die Prüfung dieser Anfrage investieren?
+﻿﻿Was genau soll geliefert werden?
+﻿﻿Unter welchen Bedingungen ist es technisch machbar?
+﻿﻿Können wir es herstellen oder beschaffen?
+﻿﻿Können wir die notwendigen Ressourcen rechtzeitig bereitstellen?
+﻿﻿Welche Mengen, Aufwände und Kosten entstehen?
+﻿﻿Welche Risiken und Verpflichtungen akzeptieren wir?
+﻿﻿Welche Angebotsvariante wollen wir dem Kunden tatsächlich vorlegen?
+…
+
+Der Ablauf entsteht teilweise erst durch die Antwor-ten. 
+
+Beispiele:
+
+Die Konstruktion entdeckt einen besonderen Materialbedarf. Dadurch wird der Einkauf beteiligt.
+
+
+Der Einkauf nennt eine lange Lieferzeit. Dadurch muss die Ressourcenplanung einen anderen Termin prüfen. 
+
+Der Vertrieb erfährt, dass der Kunde eine Teillieferung akzeptiert. Dadurch entsteht eine neue Angebotsvariante.
+
+Das passende Grundmodell ist deshalb ein dauerhaftes Vorhaben mit einem veränderbaren Bearbeitungsplan, festen Verantwortlichkeiten und verbindlichen Entscheidungsgrenzen.
+
+Dies erinnert an die adaptive Fallbearbeitung und der Standard CMMN behandeln genau solche Fälle:
+
+ Informationen und Ereignisse bestimmen, welche Tätigkeiten erforderlich werden;
+Menschen können während der Bearbeitung zusätzliche Aufgaben einplanen.

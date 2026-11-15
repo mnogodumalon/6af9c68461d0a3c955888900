@@ -20,6 +20,7 @@
 import type { ComponentType } from 'react';
 
 // <custom:intent-imports>
+import { IconFilePlus, IconChecklist, IconGavel, IconCopyPlus, IconSend } from '@tabler/icons-react';
 // </custom:intent-imports>
 
 export interface IntentLink {
@@ -42,6 +43,11 @@ export interface IntentLink {
 
 export const INTENTS: IntentLink[] = [
   // <custom:intents>
+  { path: '/intents/vorhaben-anlegen', label: { de: 'Angebotsvorhaben anlegen', en: 'Create offer project' }, icon: IconFilePlus, description: 'Eine neue Kundenanfrage als Angebotsvorhaben erfassen, Projektleitung zuordnen und die erste Prüfaufgabe planen.' },
+  { path: '/intents/aufgabe-bearbeiten', label: { de: 'Aufgabe bearbeiten', en: 'Work on task' }, icon: IconChecklist, description: 'Das Ergebnis einer Aufgabe festhalten und bei Bedarf direkt eine Folgeaufgabe für einen anderen Fachbereich anlegen.' },
+  { path: '/intents/entscheidung-festhalten', label: { de: 'Entscheidung festhalten', en: 'Record decision' }, icon: IconGavel, description: 'Eine Entscheidung zu einem Vorhaben mit Ergebnis, Begründung und finanzieller Auswirkung erfassen und die Phase weiterführen.' },
+  { path: '/intents/variante-erfassen', label: { de: 'Angebotsvariante erfassen', en: 'Add offer variant' }, icon: IconCopyPlus, description: 'Eine neue Angebotsvariante zu einem Vorhaben anlegen, etwa bei akzeptierter Teillieferung, mit Mengen, Kosten und Liefertermin.' },
+  { path: '/intents/variante-vorlegen', label: { de: 'Variante dem Kunden vorlegen', en: 'Present variant to customer' }, icon: IconSend, description: 'Die gewählte Variante als vorgelegt markieren, die übrigen verwerfen und das Vorhaben als abgegeben abschließen.' },
   // </custom:intents>
 ];
 
@@ -52,7 +58,7 @@ export const INTENTS: IntentLink[] = [
  * purpose — a scaffold update resets it to false (self-healing if Phase 2
  * never ran).
  */
-export const INTENTS_PENDING = true;
+export const INTENTS_PENDING = false;
 
 /**
  * When the Phase-1 bundle was deployed (ISO, set by the service together with

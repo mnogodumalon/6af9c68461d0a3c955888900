@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "flows": [
+    {
+      "path": "/intents/vorhaben-anlegen",
+      "label": "Angebotsvorhaben anlegen",
+      "description": "Eine neue Kundenanfrage als Angebotsvorhaben erfassen, Projektleitung zuordnen und die erste Prüfaufgabe planen.",
+      "file": "src/pages/intents/VorhabenAnlegenPage.tsx",
+      "summary": "/**\n * Angebotsvorhaben anlegen — 4-Schritt-Wizard.\n * Steps: 1) Anfrage erfassen → 2) Projektleitung wählen → 3) Erste Prüfaufgabe planen → 4) Prüfen & anlegen.\n * Reads: beteiligte. Writes: angebotsvorhaben, aufgaben (via useVorhabenAnlegenFlow).\n * Composes: IntentWizardShell, Bound, EntitySelectStep, StepNav, SummaryStep, SuccessStep.\n */",
+      "components": [
+        "Bound",
+        "EntitySelectStep",
+        "IntentWizardShell",
+        "StepNav",
+        "SuccessStep",
+        "SummaryStep",
+        "WizardStep"
+      ],
+      "writes": []
+    },
+    {
+      "path": "/intents/aufgabe-bearbeiten",
+      "label": "Aufgabe bearbeiten",
+      "description": "Das Ergebnis einer Aufgabe festhalten und bei Bedarf direkt eine Folgeaufgabe für einen anderen Fachbereich anlegen.",
+      "file": "src/pages/intents/AufgabeBearbeitenPage.tsx",
+      "summary": "/**\n * Aufgabe bearbeiten — Wizard mit optionaler Folgeaufgabe.\n * Steps: 1) Offene Aufgabe wählen → 2) Ergebnis eintragen & Status setzen → 3) Folgeaufgabe nötig? (mit Hinweis)\n *        → 4–6) Folgeaufgabe anlegen: auslösende Aufgabe, Verantwortlicher, Vorhaben + Titel/Art/Fälligkeit (nur wenn nötig) → Prüfen & speichern.\n * Reads: aufgaben, angebotsvorhaben, beteiligte. Writes: aufgaben (Update der gewählten Aufgabe + Folgeaufgaben als neue Einträge).\n * Composes: IntentWizardShell, EntitySelectStep, Bound, ListEntries, StepNav, SummaryStep, SuccessStep.\n */",
+      "components": [
+        "Bound",
+        "EntitySelectStep",
+        "IntentWizardShell",
+        "ListEntries",
+        "StepNav",
+        "SuccessStep",
+        "SummaryStep",
+        "WizardStep"
+      ],
+      "writes": []
+    },
+    {
+      "path": "/intents/entscheidung-festhalten",
+      "label": "Entscheidung festhalten",
+      "description": "Eine Entscheidung zu einem Vorhaben mit Ergebnis, Begründung und finanzieller Auswirkung erfassen und die Phase weiterführen.",
+      "file": "src/pages/intents/EntscheidungFesthaltenPage.tsx",
+      "summary": "/**\n * Entscheidung festhalten — 6-Schritt-Wizard.\n * Steps: 1) Vorhaben wählen → 2) Aufgabe (optional) → 3) Entscheider wählen → 4) Frage, Ergebnis, Begründung, Auswirkung & Freigabe\n *        → 5) Phase des Vorhabens setzen → 6) Prüfen & festhalten.\n * Reads: angebotsvorhaben, aufgaben, beteiligte. Writes: entscheidungen (create), angebotsvorhaben (nur phase, update).\n * Composes: IntentWizardShell, EntitySelectStep, Bound, StepNav, SummaryStep, SuccessStep (Hook: useEntscheidungFesthaltenFlow).\n */",
+      "components": [
+        "Bound",
+        "EntitySelectStep",
+        "IntentWizardShell",
+        "StepNav",
+        "SuccessStep",
+        "SummaryStep",
+        "WizardStep"
+      ],
+      "writes": []
+    },
+    {
+      "path": "/intents/variante-erfassen",
+      "label": "Angebotsvariante erfassen",
+      "description": "Eine neue Angebotsvariante zu einem Vorhaben anlegen, etwa bei akzeptierter Teillieferung, mit Mengen, Kosten und Liefertermin.",
+      "file": "src/pages/intents/VarianteErfassenPage.tsx",
+      "summary": "/**\n * Variante erfassen — 5-Schritt-Wizard.\n * Steps: 1) Vorhaben wählen → 2) Bezeichnung, Beschreibung, Menge, Teillieferung → 3) Kosten, Aufwand, Preis\n *        → 4) Risiken, Vertragsbedingungen, Liefertermin → 5) Prüfen & anlegen.\n * Reads: angebotsvorhaben. Writes: angebotsvarianten (Status fix „entwurf“, über den Flow-Hook).\n * Composes: IntentWizardShell, EntitySelectStep, Bound, StepNav, SummaryStep, SuccessStep.\n */",
+      "components": [
+        "Bound",
+        "EntitySelectStep",
+        "IntentWizardShell",
+        "StepNav",
+        "SuccessStep",
+        "SummaryStep",
+        "WizardStep"
+      ],
+      "writes": []
+    },
+    {
+      "path": "/intents/variante-vorlegen",
+      "label": "Variante dem Kunden vorlegen",
+      "description": "Die gewählte Variante als vorgelegt markieren, die übrigen verwerfen und das Vorhaben als abgegeben abschließen.",
+      "file": "src/pages/intents/VarianteVorlegenPage.tsx",
+      "summary": "/**\n * Variante dem Kunden vorlegen — 3-Schritt-Wizard.\n * Steps: 1) Vorhaben wählen → 2) Intern freigegebene Variante wählen → 3) Bestätigen & vorlegen.\n * Reads: angebotsvorhaben, angebotsvarianten. Writes: angebotsvarianten (status), angebotsvorhaben (phase = angebot_abgegeben)\n * via useVarianteVorlegenFlow.\n * Composes: IntentWizardShell, EntitySelectStep, StepNav, SummaryStep, SuccessStep.\n */",
+      "components": [
+        "EntitySelectStep",
+        "IntentWizardShell",
+        "SuccessStep",
+        "SummaryStep",
+        "WizardStep"
+      ],
+      "writes": []
+    }
+  ],
+  "unregistered_pages": []
+}

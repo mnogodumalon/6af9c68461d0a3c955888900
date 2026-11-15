@@ -109,6 +109,8 @@ export function useVarianteErfassenFlow(options: VarianteErfassenFlowOptions = {
   const angebotsvarianten = useStepForm('angebotsvarianten', {
     fields: ["menge", "vorhaben", "beschreibung", "liefertermin", "angebotspreis", "teillieferung", "herstellkosten", "aufwand_stunden", "beschaffungskosten", "akzeptierte_risiken", "vertragsbedingungen", "variantenbezeichnung"],
     steps: only(steps, ["menge", "vorhaben", "beschreibung", "liefertermin", "angebotspreis", "teillieferung", "herstellkosten", "aufwand_stunden", "beschaffungskosten", "akzeptierte_risiken", "vertragsbedingungen", "variantenbezeichnung"]) as Record<string, number>,
+    // the plan builds a value from these — required here, whatever the app's base view says
+    required: { vorhaben: true },
     initial: only(options.initial as FormValues | undefined, ["menge", "vorhaben", "beschreibung", "liefertermin", "angebotspreis", "teillieferung", "herstellkosten", "aufwand_stunden", "beschaffungskosten", "akzeptierte_risiken", "vertragsbedingungen", "variantenbezeichnung"]),
     messages: only(options.messages as Record<string, string> | undefined, ["menge", "vorhaben", "beschreibung", "liefertermin", "angebotspreis", "teillieferung", "herstellkosten", "aufwand_stunden", "beschaffungskosten", "akzeptierte_risiken", "vertragsbedingungen", "variantenbezeichnung"]),
   });

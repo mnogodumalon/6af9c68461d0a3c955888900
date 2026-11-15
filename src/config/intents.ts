@@ -20,7 +20,7 @@
 import type { ComponentType } from 'react';
 
 // <custom:intent-imports>
-import { IconFilePlus, IconChecklist, IconGavel, IconCopyPlus, IconSend } from '@tabler/icons-react';
+import { IconFilePlus, IconChecklist, IconGavel, IconCopyPlus, IconSend, IconListCheck } from '@tabler/icons-react';
 // </custom:intent-imports>
 
 export interface IntentLink {
@@ -48,6 +48,7 @@ export const INTENTS: IntentLink[] = [
   { path: '/intents/entscheidung-festhalten', label: { de: 'Entscheidung festhalten', en: 'Record decision' }, icon: IconGavel, description: { de: 'Eine Entscheidung zu einem Vorhaben mit Ergebnis, Begründung und finanzieller Auswirkung erfassen und die Phase weiterführen.', en: 'Record a decision on a project with result, justification and financial impact, and continue the phase.' } },
   { path: '/intents/variante-erfassen', label: { de: 'Angebotsvariante erfassen', en: 'Add offer variant' }, icon: IconCopyPlus, description: { de: 'Eine neue Angebotsvariante zu einem Vorhaben anlegen, etwa bei akzeptierter Teillieferung, mit Mengen, Kosten und Liefertermin.', en: 'Create a new quote variant for a project, e.g. for an accepted partial delivery, with quantities, costs and delivery date.' } },
   { path: '/intents/variante-vorlegen', label: { de: 'Variante dem Kunden vorlegen', en: 'Present variant to customer' }, icon: IconSend, description: { de: 'Die gewählte Variante als vorgelegt markieren, die übrigen verwerfen und das Vorhaben als abgegeben abschließen.', en: 'Mark the selected variant as submitted, discard the others and close the project as submitted.' } },
+  { path: '/intents/anforderung-anlegen', label: { de: 'Anforderung anlegen', en: 'Add requirement' }, icon: IconListCheck, description: 'Neue Anforderung zu einem Angebotsvorhaben erfassen, Quelle dokumentieren und Vorgängerversion verknüpfen' },
   // </custom:intents>
 ];
 

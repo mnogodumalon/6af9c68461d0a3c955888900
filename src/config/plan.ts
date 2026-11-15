@@ -14,7 +14,20 @@
 
 import { INTENTS } from '@/config/intents';
 
-export const SYSTEM_ASSIGNED: Record<string, string[]> = {};
+export const SYSTEM_ASSIGNED: Record<string, string[]> = {
+  "anforderungen": [
+    "version"
+  ],
+  "angebotsvarianten": [
+    "version"
+  ],
+  "entscheidungen": [
+    "freigabestatus"
+  ],
+  "abhaengigkeiten": [
+    "pruefung_status"
+  ]
+};
 
 export const PLAN_SENTENCES: Record<string, string[]> = {
   "vorhaben-anlegen": [
@@ -38,6 +51,14 @@ export const PLAN_SENTENCES: Record<string, string[]> = {
   "variante-vorlegen": [
     "Ändert: angebotsvarianten, angebotsvorhaben",
     "Automatisch: phase (fester Wert „angebot_abgegeben“)"
+  ],
+  "anforderung-anlegen": [
+    "Legt an: anforderungen",
+    "Automatisch: status (fester Wert „entwurf“)"
+  ],
+  "fachbeitrag-erfassen": [
+    "Legt an: fachbeitraege",
+    "Automatisch: status (fester Wert „entwurf“)"
   ]
 };
 
@@ -100,6 +121,12 @@ export const FLOW_ENTITIES: Record<string, string[]> = {
   "variante-vorlegen": [
     "angebotsvarianten",
     "angebotsvorhaben"
+  ],
+  "anforderung-anlegen": [
+    "anforderungen"
+  ],
+  "fachbeitrag-erfassen": [
+    "fachbeitraege"
   ]
 };
 

@@ -24,6 +24,7 @@ const IntentAufgabeBearbeitenPage = lazy(() => import('@/pages/intents/AufgabeBe
 const IntentEntscheidungFesthaltenPage = lazy(() => import('@/pages/intents/EntscheidungFesthaltenPage'));
 const IntentVarianteErfassenPage = lazy(() => import('@/pages/intents/VarianteErfassenPage'));
 const IntentVarianteVorlegenPage = lazy(() => import('@/pages/intents/VarianteVorlegenPage'));
+const IntentAnforderungAnlegenPage = lazy(() => import('@/pages/intents/AnforderungAnlegenPage'));
 // </custom:imports>
 
 // Lazy: public pages live outside <Layout> and only load on /#/public/:slug —
@@ -106,6 +107,7 @@ export default function App() {
                 <Route path="intents/entscheidung-festhalten" element={<Suspense fallback={<DashboardSkeleton />}><IntentEntscheidungFesthaltenPage /></Suspense>} />
                 <Route path="intents/variante-erfassen" element={<Suspense fallback={<DashboardSkeleton />}><IntentVarianteErfassenPage /></Suspense>} />
                 <Route path="intents/variante-vorlegen" element={<Suspense fallback={<DashboardSkeleton />}><IntentVarianteVorlegenPage /></Suspense>} />
+                <Route path="intents/anforderung-anlegen" element={<Suspense fallback={<DashboardSkeleton />}><IntentAnforderungAnlegenPage /></Suspense>} />
                 {/* </custom:routes> */}
                 {/* An unknown hash (a bookmark from before a rebuild renamed the
                     flows, a mistyped link) must not be a blank page. */}
